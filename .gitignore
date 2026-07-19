@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local data products and databases
+01_data_collection_cleaning/raw/**
+!01_data_collection_cleaning/raw/.gitkeep
+01_data_collection_cleaning/interim/**
+!01_data_collection_cleaning/interim/.gitkeep
+01_data_collection_cleaning/processed/**
+!01_data_collection_cleaning/processed/.gitkeep
+01_data_collection_cleaning/manual_downloads/**
+*.sqlite
+*.sqlite3
+*.db
+*.parquet

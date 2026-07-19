@@ -1,0 +1,41 @@
+column_name,source_dataset,original_field_or_series,description,unit,data_type,merge_role,notes
+delivery_date,derived,delivery_date,ERCOT local delivery date.,,string,merge_key,
+hour_ending,derived,hour_ending,ERCOT hour-ending label retained from the source.,,string,merge_key,
+delivery_datetime,derived,delivery_datetime,Canonical interval-end timestamp in America/Chicago; DST folds have distinct offsets.,,"datetime64[ns, America/Chicago]",merge_key,
+dst_flag,derived,dst_flag,ERCOT DST indicator; disambiguates the repeated fall-back hour.,,string,merge_key,
+load_forecast_issue_time,load,load_forecast_issue_time,Pre-DAM load field: load_forecast_issue_time.,,string,provenance,
+wind_forecast_issue_time,wind,wind_forecast_issue_time,Pre-DAM wind field: wind_forecast_issue_time.,,string,provenance,
+solar_forecast_issue_time,solar,solar_forecast_issue_time,Pre-DAM solar field: solar_forecast_issue_time.,,string,provenance,
+load_issue_date,load,load_issue_date,Pre-DAM load field: load_issue_date.,,string,provenance,
+wind_issue_date,wind,wind_issue_date,Pre-DAM wind field: wind_issue_date.,,string,provenance,
+solar_issue_date,solar,solar_issue_date,Pre-DAM solar field: solar_issue_date.,,string,provenance,
+load_source_product_id,load,load_source_product_id,Pre-DAM load field: load_source_product_id.,,string,provenance,
+wind_source_product_id,wind,wind_source_product_id,Pre-DAM wind field: wind_source_product_id.,,string,provenance,
+solar_source_product_id,solar,solar_source_product_id,Pre-DAM solar field: solar_source_product_id.,,string,provenance,
+load_coast_mw,load,Coast,Pre-DAM load field: Coast.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_east_mw,load,East,Pre-DAM load field: East.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_far_west_mw,load,FarWest,Pre-DAM load field: FarWest.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_north_mw,load,North,Pre-DAM load field: North.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_north_central_mw,load,NorthCentral,Pre-DAM load field: NorthCentral.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_south_central_mw,load,SouthCentral,Pre-DAM load field: SouthCentral.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_southern_mw,load,Southern,Pre-DAM load field: Southern.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_west_mw,load,West,Pre-DAM load field: West.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+load_system_total_mw,load,SystemTotal,Pre-DAM load field: SystemTotal.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_stwpf_lz_north_mw,wind,STWPF,Pre-DAM wind field: STWPF.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_stwpf_lz_south_houston_mw,wind,STWPF,Pre-DAM wind field: STWPF.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_stwpf_lz_west_mw,wind,STWPF,Pre-DAM wind field: STWPF.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_stwpf_system_wide_mw,wind,STWPF,Pre-DAM wind field: STWPF.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_wgrpp_lz_north_mw,wind,WGRPP,Pre-DAM wind field: WGRPP.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_wgrpp_lz_south_houston_mw,wind,WGRPP,Pre-DAM wind field: WGRPP.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_wgrpp_lz_west_mw,wind,WGRPP,Pre-DAM wind field: WGRPP.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+wind_wgrpp_system_wide_mw,wind,WGRPP,Pre-DAM wind field: WGRPP.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+solar_pvgrpp_system_mw,solar,PVGRPP,Pre-DAM solar field: PVGRPP.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+solar_stppf_system_mw,solar,STPPF,Pre-DAM solar field: STPPF.,MW,float64,feature,Pre-DAM forecast feature only; no actuals or prices.
+has_load_forecast,derived,has_load_forecast,True when Load forecast values are available for the delivery hour.,,boolean,quality_flag,
+has_wind_forecast,derived,has_wind_forecast,True when Wind forecast values are available for the delivery hour.,,boolean,quality_flag,
+has_solar_forecast,derived,has_solar_forecast,True when Solar forecast values are available for the delivery hour.,,boolean,quality_flag,
+has_all_three_forecasts,derived,has_all_three_forecasts,"True when Load, Wind, and Solar forecasts are all available.",,boolean,quality_flag,
+load_pre_dam_valid,load,load_pre_dam_valid,Pre-DAM load field: load_pre_dam_valid.,,boolean,quality_flag,
+wind_pre_dam_valid,wind,wind_pre_dam_valid,Pre-DAM wind field: wind_pre_dam_valid.,,boolean,quality_flag,
+solar_pre_dam_valid,solar,solar_pre_dam_valid,Pre-DAM solar field: solar_pre_dam_valid.,,boolean,quality_flag,
+all_issue_times_pre_dam_valid,derived,all_issue_times_pre_dam_valid,True when every available source was issued strictly before 10:00 ERCOT local time.,,boolean,quality_flag,
