@@ -9,7 +9,7 @@ import sqlite3
 
 # --- 1. 页面配置 ---
 st.set_page_config(
-    page_title="North Hub Spread Prediction Terminal", 
+    page_title="GridWise | North Hub Spread Prediction Terminal", 
     page_icon="⚡", 
     layout="wide", 
     initial_sidebar_state="expanded" 
@@ -79,7 +79,7 @@ with st.sidebar:
 # --- 顶部区域 ---
 col_logo, col_title, col_status = st.columns([1, 4, 1])
 with col_logo:
-    st.markdown("### ⚡ PowerQuant") 
+    st.markdown("### ⚡ GridWise") 
 with col_title:
     st.markdown("<h2 style='text-align: center;'>ERCOT North Hub DAM-RTM Spread Terminal</h2>", unsafe_allow_html=True)
 with col_status:
@@ -131,49 +131,13 @@ with col_chart:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# 2. 调用大模型生成策略 (保留原来的宏观策略按钮)
+# 2. 调用大模型生成策略
 with col_ai:
-    # --- 新增：利用分栏将标题、动画文字和按钮放在同一行 ---
-    st.markdown("""
-    <style>
-    @keyframes pointRight {
-        0%, 20%, 50%, 80%, 100% {transform: translateX(0);}
-        40% {transform: translateX(-5px);}
-        60% {transform: translateX(-3px);}
-    }
-    .pointer-text {
-        color: #00E676;
-        font-size: 13px;
-        font-weight: bold;
-        text-align: right;
-        margin-top: 10px; /* 向下微调以对齐标题 */
-        animation: pointRight 1.5s infinite;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # 按照 5:4:3 的比例划分三个子列
-    title_col, text_col, btn_col = st.columns([5, 4, 3])
-    
-    with title_col:
-        st.markdown("#### 🤖 LLM Trading Advisor")
-        
-    with text_col:
-        # 当聊天窗没打开时，显示向右指的动画文字
-        if not st.session_state.chat_open:
-            st.markdown("<div class='pointer-text'>Query Database? Click here!👉</div>", unsafe_allow_html=True)
-            
-    with btn_col:
-        # 加一点 margin-top 让按钮和纯文本在垂直方向居中对齐
-        st.markdown("<div style='margin-top: 2px;'></div>", unsafe_allow_html=True)
-        if not st.session_state.chat_open:
-            # 按钮现在直接跟在标题右边了！
-            if st.button("🤖 Agent", key="open_chat", use_container_width=True):
-                st.session_state.chat_open = True
-                st.rerun()
-
+    # 1. 标题独占一行，解决拥挤问题
+    st.markdown("#### 🤖 LLM Trading Advisor")
     st.info("AI is ready to analyze spread predictions.")
     
+    # 2. 策略生成按钮
     if st.button("Generate Strategy via AI", type="primary", use_container_width=True):
         if not api_key:
             st.error("API Key is missing!")
@@ -200,17 +164,101 @@ with col_ai:
                     st.error(f"API Error: {e}")
     else:
         st.markdown("*(Click the button above to generate a real-time strategy)*")
-        
-    # 引导用户使用右下角的数据库问答助手
+
     st.markdown("<br>", unsafe_allow_html=True)
+    
+    # --- 3. 将 3D 机器人作为悬浮按钮 (终极锚点锁定版) ---
+    import base64
+    import os
+    
+    def get_robot_image(bin_file):
+        try:
+            with open(bin_file, 'rb') as f:
+                data = f.read()
+            return f"data:image/png;base64,{base64.b64encode(data).decode()}"
+        except FileNotFoundError:
+            # 备用高清 3D 机器人动图，防崩底线
+            return "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Robot.png"
+
+    img_url = get_robot_image("agent_avatar.png") 
+
+    robot_btn_css = f"""
+    <style>
+    @keyframes gentle-sway {{
+        0% {{ transform: rotate(0deg); }}
+        25% {{ transform: rotate(6deg); }}
+        50% {{ transform: rotate(0deg); }}
+        75% {{ transform: rotate(-6deg); }}
+        100% {{ transform: rotate(0deg); }}
+    }}
+    @keyframes pointRight {{
+        0%, 20%, 50%, 80%, 100% {{transform: translateX(0);}}
+        40% {{transform: translateX(-5px);}}
+        60% {{transform: translateX(-3px);}}
+    }}
+    .pointer-text {{
+        color: #00E676;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: right;
+        margin-top: 50px; 
+        animation: pointRight 1.5s infinite;
+    }}
+    
+    /* 终极魔法：精准打击！寻找带有 #magic-anchor 的容器，把紧挨着它的下一个元素(按钮)彻底爆改！ */
+    div[data-testid="stElementContainer"]:has(#magic-anchor) + div[data-testid="stElementContainer"] button {{
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 120px !important;  
+        height: 120px !important; 
+        background-image: url('{img_url}') !important;
+        background-size: contain !important;
+        background-repeat: no-repeat !important;
+        background-position: center bottom !important;
+        animation: gentle-sway 4s ease-in-out infinite !important; 
+        transform-origin: bottom center !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }}
+    
+    /* 强制隐藏原本的 Agent 文字 */
+    div[data-testid="stElementContainer"]:has(#magic-anchor) + div[data-testid="stElementContainer"] button * {{
+        display: none !important;
+    }}
+    
+    /* 鼠标悬停发光特效 */
+    div[data-testid="stElementContainer"]:has(#magic-anchor) + div[data-testid="stElementContainer"] button:hover {{
+        filter: drop-shadow(0px 0px 15px rgba(0, 230, 118, 0.8)) !important;
+        transform: scale(1.05) !important;
+    }}
+    </style>
+    """
+    st.markdown(robot_btn_css, unsafe_allow_html=True)
+
+    if not st.session_state.chat_open:
+        col_text, col_btn = st.columns([5, 4])
+        with col_text:
+            st.markdown("<div class='pointer-text'>Ask RAG Agent (24-26 Data & Decisions) 👉</div>", unsafe_allow_html=True)
+        with col_btn:
+            # === 【极度重要】这里的“隐形锚点”是核心机关，它是 CSS 的靶子，绝对不能删！ ===
+            st.markdown('<span id="magic-anchor"></span>', unsafe_allow_html=True)
+            # ====================================================================
+            
+            # 按钮本身还是原来的样子，但会被上面的魔法瞬间变成 3D 机器人
+            if st.button("Agent", key="open_chat"):
+                st.session_state.chat_open = True
+                st.rerun()
+
+    # 4. 更新底部提示文字
     st.markdown("""
-    <div style='background: rgba(0, 230, 118, 0.1); border-left: 4px solid #00E676; padding: 15px; border-radius: 5px;'>
-        <b>Deep Dive into Data?</b><br>
-        Ask our interactive AI Agent to query the historical SQLite database directly! Look for the floating assistant. <span style='font-size: 18px;'>↘️</span>
+    <div style='background: rgba(0, 230, 118, 0.1); border-left: 4px solid #00E676; padding: 15px; border-radius: 5px; margin-top: 10px;'>
+        <b>Deep Dive into Data with RAG?</b><br>
+        Ask our interactive <b>RAG Agent</b> to query any historical data from <b>2024 to 2026</b> directly from the SQLite database. You can also consult it for spread predictions and trading decision support!<br><br>
+        <span style='color: #00E676; font-weight: bold;'>↗️ (Please click the 🤖 Robot above to expand the conversation)</span>
     </div>
     """, unsafe_allow_html=True)
-
-st.markdown("<hr><p style='text-align: center; color: gray; font-size: 12px;'>© 2024 PowerQuant Team. For Demonstration Purposes Only.</p>", unsafe_allow_html=True)
 
 # ==========================================
 # 聊天交互界面 (在页面最下方展开)
