@@ -1,22 +1,22 @@
 import os
 from langchain_community.utilities import SQLDatabase
 from langchain_openai import ChatOpenAI
-from langchain.agents import create_sql_agent
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
+from langchain_community.agent_toolkits import create_sql_agent  # <--- 修改了这里
+from langchain_community.agent_toolkits import SQLDatabaseToolkit # <--- 建议这里也改一下
 
-# ... 之前导入库的代码保持不变 ...
-
-def get_sql_agent_response(user_question, db_path="sqlite:///ercot_data.db"):
+# 将 api_key 作为参数传入
+def get_sql_agent_response(user_question, api_key, db_path="sqlite:///ercot_data.db"):
     db = SQLDatabase.from_uri(db_path)
+    
+    # 动态使用传入的 api_key
     llm = ChatOpenAI(
         model="deepseek-chat", 
-        api_key="你的API_KEY", 
+        api_key=api_key, 
         base_url="https://api.deepseek.com", 
         temperature=0
     )
     toolkit = SQLDatabaseToolkit(db=db, llm=llm)
     
-    # 🚀 核心新增：为 AI 注入数据说明文档（Metadata）的知识
     system_prefix = """
     You are an expert quantitative power trader and a highly skilled SQL assistant for the ERCOT market.
     You query a SQLite table named 'model_wide_hourly_2024_2026'.
@@ -35,7 +35,7 @@ def get_sql_agent_response(user_question, db_path="sqlite:///ercot_data.db"):
         toolkit=toolkit,
         verbose=True,
         agent_type="openai-tools",
-        prefix=system_prefix # 将 Prompt 注入
+        prefix=system_prefix 
     )
     
     response = agent_executor.invoke({"input": user_question})
