@@ -1,16 +1,17 @@
 import streamlit as st
-import time
-import pandas as pd
-import json
 import pickle 
 import os
+import requests
+
+# 👉 确保此处导入了你刚才的后端函数。如果你的文件名不是 backend.py，请修改这里的 'backend'。
+from rag_backend import get_sql_agent_response
 
 st.set_page_config(page_title="GridWise AI Copilot", page_icon="🤖", layout="wide")
-# --- 记忆持久化配置 ---
+
+# --- 1. 记忆持久化配置 ---
 HISTORY_CACHE_FILE = "agent_memory.pkl"
 
 def load_memory():
-    """从本地读取聊天记忆"""
     if os.path.exists(HISTORY_CACHE_FILE):
         try:
             with open(HISTORY_CACHE_FILE, "rb") as f:
@@ -20,154 +21,121 @@ def load_memory():
     return []
 
 def save_memory(history):
-    """将聊天记忆保存到本地"""
     with open(HISTORY_CACHE_FILE, "wb") as f:
         pickle.dump(history, f)
 
-# --- 1. Page Header (SaaS Layout) ---
+# --- 2. 页面与安全检查 ---
 st.markdown("### 🤖 GridWise Intelligence Copilot & Decision Terminal")
-st.markdown(
-    "<small style='color: #888;'>Integrating Live DB + ML Predictions + ERCOT Market Knowledge Base</small>", 
-    unsafe_allow_html=True
-)
+st.markdown("<small style='color: #888;'>Powered by LangChain SQL Agent + DeepSeek LLM</small>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Security Check
+# 安全检查：获取主页存入的 API Key
 api_key = st.session_state.get('api_key', None)
 if not api_key:
     st.warning("⚠️ **System Lock:** Please return to the Main Page and enter your DeepSeek API Key to unlock the decision terminal.")
     st.stop()
 
-# --- 2. Sidebar: Source Observability ---
+# --- 3. 侧边栏 ---
 with st.sidebar:
     st.markdown("### 🔍 Active Knowledge Sources")
-    st.success("📊 Real-Time DB: `model_wide_hourly_2024_2026` (Connected)")
-    st.success("🤖 ML Model: `v2.4-Ensemble-LSTM` (Active)")
-    st.success("📜 Knowledge Base: `ERCOT Nodal Protocols 2026` (Loaded)")
+    st.success("📊 Real-Time DB: Connected via LangChain")
+    st.success("🤖 DeepSeek LLM: Active")
     st.markdown("---")
     
-    # 修改这里的清除按钮逻辑
     if st.button("🧹 Clear Conversation History", use_container_width=True):
         st.session_state.chat_history = []
         if os.path.exists(HISTORY_CACHE_FILE):
-            os.remove(HISTORY_CACHE_FILE) # 物理删除记忆文件
+            os.remove(HISTORY_CACHE_FILE)
         st.rerun()
 
-# --- 3. Initialize Global State ---
+# --- 4. 初始化状态与渲染历史对话 ---
 if "chat_history" not in st.session_state:
-    # 以前是 = []，现在改为从文件读取
     st.session_state.chat_history = load_memory()
 
-# --- 4. Scene Quick Commands (High-Frequency Queries) ---
-st.markdown("##### ⚡ Quick Decision Commands")
-cmd_cols = st.columns(4)
+# 新增：用于存放语音转写后的文本草稿
+if "draft_prompt" not in st.session_state:
+    st.session_state.draft_prompt = None
 
-with cmd_cols[0]:
-    if st.button("🔋 Optimal BESS Dispatch", use_container_width=True, help="Scenario: Strategy Recommendation"):
-        st.session_state.preset_prompt = "Analyze the forecasted DAM-RTM spread for ERCOT North Hub tomorrow and recommend the optimal charge/discharge strategy for a Battery Energy Storage System (BESS)."
-with cmd_cols[1]:
-    if st.button("🚨 Price Spike Alert", use_container_width=True, help="Scenario: Risk Warning"):
-        st.session_state.preset_prompt = "Identify any extreme high-price risks in the RTM for the next 24 hours driven by weather anomalies or load surges."
-with cmd_cols[2]:
-    if st.button("📈 Weekly Arbitrage Check", use_container_width=True, help="Scenario: Market Analysis"):
-        st.session_state.preset_prompt = "Evaluate the spread arbitrage opportunities at the North Hub based on the DAM and RTM forecasts for the upcoming week."
-with cmd_cols[3]:
-    if st.button("📜 ERCOT Protocol Query", use_container_width=True, help="Scenario: Rule Retrieval"):
-        st.session_state.preset_prompt = "Retrieve the latest ERCOT protocols regarding Virtual Bidding constraints and settlement rules."
-
-# --- 5. Render Chat History ---
 for message in st.session_state.chat_history:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        
-        # Render structured dataframe and sources if they exist in history
-        if "dataframe" in message:
-            st.markdown("**📋 Raw Query Results:**")
-            st.dataframe(message["dataframe"], use_container_width=True)
-        if "sources" in message:
-            st.caption(f"🔗 **Sources:** {message['sources']}")
 
-# --- 6. Core Chat Input & Logic ---
-prompt_input = st.chat_input("Ask anything to the decision terminal...")
-prompt = prompt_input or st.session_state.get("preset_prompt", None)
+# --- 5. 核心聊天逻辑 ---
+st.markdown("---")
 
-if prompt:
-    # Reset preset state
-    if "preset_prompt" in st.session_state:
-        st.session_state.preset_prompt = None
-        
-    # 1. Display User Input
-    st.session_state.chat_history.append({"role": "user", "content": prompt})
+# 1. 渲染语音录制按钮
+voice_text = speech_to_text(
+    language='en-US',          
+    start_prompt="🎙️ Click to Record Voice",
+    stop_prompt="🛑 Stop Recording & Edit",
+    just_once=True,
+    key='voice_input'
+)
+
+# 2. 如果录音结束并返回了文本，存入草稿箱并刷新 UI
+if voice_text:
+    st.session_state.draft_prompt = voice_text
+    st.rerun()
+
+prompt_to_execute = None
+
+# 3. 动态 UI 切换：如果有语音草稿，则显示“编辑区”；否则显示正常的聊天输入框
+if st.session_state.draft_prompt is not None:
+    st.info("💡 Voice captured! Edit your prompt below before sending:")
+    # 提供一个多行文本框供用户修改语音识别结果
+    edited_text = st.text_area("📝 Edit Prompt:", value=st.session_state.draft_prompt, height=100)
+    
+    col1, col2, col3 = st.columns([1, 1, 4])
+    with col1:
+        if st.button("🚀 Send", use_container_width=True):
+            prompt_to_execute = edited_text
+            st.session_state.draft_prompt = None # 发送后清空草稿
+    with col2:
+        if st.button("🗑️ Cancel", use_container_width=True):
+            st.session_state.draft_prompt = None
+            st.rerun() # 取消后直接刷新页面，回到初始状态
+else:
+    # 正常的键盘输入流
+    text_input = st.chat_input("Ask about ERCOT historical data (or use the mic above 🎙️)...")
+    if text_input:
+        prompt_to_execute = text_input
+
+# ================= 执行 Agent 逻辑 =================
+if prompt_to_execute:
+    # 渲染用户提问
+    st.session_state.chat_history.append({"role": "user", "content": prompt_to_execute})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(prompt_to_execute)
         
-    # 2. AI Response Area
+    # 渲染 AI 回复
     with st.chat_message("assistant"):
-        text_placeholder = st.empty()
-        
-        with st.spinner("Agent syntax parsing & executing DB/ML query..."):
+        with st.spinner("🤖 Cloud Agent is analyzing the database..."):
             try:
-                # 🛠️ For production, replace with your actual backend call:
-                # raw_response = get_sql_agent_response(prompt, api_key=api_key)
+                # 替换为调用后端的 FastAPI 接口
+                api_url = "http://127.0.0.1:8000/v1/agent/ask" # 替换为他实际给你的网址
+                payload = {
+                    "question": prompt_to_execute,
+                    "api_key": api_key
+                }
                 
-                time.sleep(1.5) # Simulating execution time
+                # 发送请求给后端
+                response = requests.post(api_url, json=payload, timeout=60)
                 
-                # Mock AI text response in professional trading English
-                text_analysis = """
-### 📊 Quantitative Strategy Output
-Based on the `v2.4-Ensemble-LSTM` model's DAM and RTM spread predictions for ERCOT North Hub tomorrow (July 21, 2026), the system has identified a significant intraday dual-peak arbitrage opportunity.
-
-> 🔋 **Optimal BESS Dispatch Recommendation:**
-> * **Charging Period:** **01:00 - 05:00**. Execute bulk charging. The model predicts negative or extremely low RTM prices averaging **$28/MWh**.
-> * **Discharging Period:** **14:00 - 18:00**. Dispatch at full capacity. The evening peak load surge will widen the spread, with forecasted average prices reaching **$82/MWh**.
-> * **Economic Evaluation:** The estimated arbitrage spread per cycle is **$54/MWh**. After accounting for a 15% round-trip efficiency loss, the net revenue remains highly favorable.
-
-### 🚨 Trading Risk Notice
-Weather forecasts for HE 17:00 indicate a risk of localized severe convection in North Texas. RTM prices may experience transient spikes (exceeding $300/MWh). It is recommended to inject power linearly in tranches and avoid over-exposing positions within a single trading interval.
-                """
+                if response.status_code == 200:
+                    ai_response = response.json().get("answer", "No response from agent.")
+                else:
+                    ai_response = f"⚠️ Backend Error: {response.text}"
                 
-                # Mock Database DataFrame output
-                mock_df = pd.DataFrame({
-                    "HE (Hour Ending)": [f"{i:02d}:00" for i in range(1, 7)],
-                    "DAM Predicted ($/MWh)": [32.5, 30.1, 28.4, 27.9, 29.0, 35.6],
-                    "RTM Predicted ($/MWh)": [29.0, 26.2, 24.0, 25.5, 31.0, 42.1],
-                    "Spread Forecast ($/MWh)": [-3.5, -3.9, -4.4, -2.4, +2.0, +6.5]
-                })
+                st.markdown(ai_response)
                 
-                mock_sources = "📁 DB Table: `model_wide_hourly_2024_2026` | 🤖 ML Model: `v2.4-LSTM` | 📜 ERCOT Protocol Sec 4.4"
-                
-                # --- Rendering Logic ---
-                # A. Render Text Analysis
-                text_placeholder.markdown(text_analysis)
-                
-                # B. Render Raw Data Table
-                st.markdown("**📋 Raw Database Outputs**")
-                st.dataframe(mock_df, use_container_width=True)
-                
-                # C. Render Source Citations
-                st.markdown(
-                    f"<div style='background-color: rgba(255, 255, 255, 0.05); padding: 8px 12px; border-radius: 4px; border-left: 3px solid #00E676; margin-top: 15px;'>"
-                    f"<small style='color: #bbb;'>🔗 <b>Sources:</b> {mock_sources}</small>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
-                
-                # 3. Save full structured response to history
-                st.session_state.chat_history.append({
-                    "role": "assistant",
-                    "content": text_analysis,
-                    "dataframe": mock_df,
-                    "sources": mock_sources
-                })
-                
-                # 新增这一行：只要有新对话，立刻物理存档
+                # 存入记忆
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 save_memory(st.session_state.chat_history)
                 
             except Exception as e:
-                error_msg = f"❌ **Agent Execution Error:** {str(e)}"
-                text_placeholder.markdown(error_msg)
+                error_msg = f"❌ **Network Execution Error:** {str(e)}"
+                st.error(error_msg)
                 st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
-                # 报错信息也存下来
                 save_memory(st.session_state.chat_history)
                 
-    st.rerun()
+    st.rerun() # 执行完毕后刷新页面，保持 UI 干净

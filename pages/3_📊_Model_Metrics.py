@@ -26,11 +26,7 @@ def calculate_metrics(y_true, y_pred):
 # ==========================================
 # Page Layout: Using Tabs for Structure
 # ==========================================
-tab_backtest, tab_compare, tab_feature = st.tabs([
-    "📈 Backtest & Accuracy", 
-    "📊 Version Comparison", 
-    "🧠 Explainable AI"
-])
+tab_backtest, tab_feature = st.tabs(["📈 Backtest & Accuracy", "🧠 Explainable AI"])
 
 # ------------------------------------------
 # Tab 1: Historical Backtest Tool & Accuracy Board
@@ -110,43 +106,7 @@ with tab_backtest:
     else:
         st.warning(f"⚠️ Backtest file not found: {backtest_csv_path}")
 
-# ------------------------------------------
-# Tab 2: Model Version Comparison
-# ------------------------------------------
-with tab_compare:
-    st.markdown("#### 📊 Model Iteration Performance")
-    st.markdown("Track the optimization progress across different model architectures.")
-    
-    # Simulating data from outputs/comparison_tables/linear_model_comparison.csv
-    data_versions = {
-        'Version': ['v1.0 (Ridge Baseline)', 'v2.0 (XGBoost)', 'v2.4 (LightGBM Pipeline)'],
-        'MAE ($/MWh)': [6.45, 4.82, 3.95],
-        'RMSE ($/MWh)': [10.21, 7.55, 6.12],
-        'Inference Latency (ms)': [15, 120, 45]
-    }
-    df_versions = pd.DataFrame(data_versions)
-    
-    col_v1, col_v2 = st.columns([1, 1])
-    
-    with col_v1:
-        st.dataframe(df_versions, use_container_width=True, hide_index=True)
-        
-    with col_v2:
-        fig_ver = go.Figure()
-        fig_ver.add_trace(go.Bar(
-            x=df_versions['Version'], y=df_versions['MAE ($/MWh)'], 
-            name='MAE', marker_color='#29B6F6'
-        ))
-        fig_ver.add_trace(go.Bar(
-            x=df_versions['Version'], y=df_versions['RMSE ($/MWh)'], 
-            name='RMSE', marker_color='#AB47BC'
-        ))
-        fig_ver.update_layout(
-            template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-            barmode='group', height=300, margin=dict(l=0, r=0, t=10, b=0),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-        )
-        st.plotly_chart(fig_ver, use_container_width=True)
+
 
 # ------------------------------------------
 # Tab 3: Feature Importance Analysis (Explainable AI)
