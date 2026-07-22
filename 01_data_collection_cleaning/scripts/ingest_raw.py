@@ -95,6 +95,46 @@ def _read_csv_records(path: Path) -> Iterator[dict[str, Any]]:
 
 
 def _openmeteo_records(payload: dict[str, Any], dataset: str) -> Iterator[dict[str, Any]]:
+    locations = payload.get("locations")
+    if isinstance(locations, list):
+        for location_payload in locations:
+            if not isinstance(location_payload, dict):
+                continue
+            location_name = location_payload.get("location")
+            hourly = location_payload.get("hourly")
+            if not isinstance(hourly, dict) or not isinstance(
+                hourly.get("time"), list
+            ):
+                continue
+            times = hourly["time"]
+            columns = {
+                key: values
+                for key, values in hourly.items()
+                if key != "time" and isinstance(values, list)
+            }
+            context = {
+                key: location_payload.get(key)
+                for key in (
+                    "forecast_run_time_utc",
+                    "decision_cutoff_utc",
+                    "forecast_model",
+                    "forecast_lead_rule",
+                    "availability_assumption",
+                    "delivery_date_local",
+                )
+                if location_payload.get(key) is not None
+            }
+            for index, interval_start in enumerate(times):
+                record: dict[str, Any] = {
+                    "location": location_name,
+                    "interval_start": interval_start,
+                    **context,
+                }
+                for key, values in columns.items():
+                    record[key] = values[index] if index < len(values) else None
+                yield record
+        return
+
     hourly = payload.get("hourly")
     if not isinstance(hourly, dict) or not isinstance(hourly.get("time"), list):
         yield payload

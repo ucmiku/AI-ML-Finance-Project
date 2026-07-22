@@ -14,11 +14,12 @@ DEFAULT_ANALYTICS_DATABASE = (
     DATA_WORKSPACE / "interim" / "ercot_analytics.sqlite"
 )
 DEFAULT_EXPORT_CSV = (
-    DATA_WORKSPACE / "processed" / "model_wide_hourly_2024_2026.csv"
+    DATA_WORKSPACE / "processed" / "model_wide_hourly_2024_2026_final.csv"
 )
 
-MODEL_START_UTC = "2024-01-01T00:00:00Z"
-MODEL_END_EXCLUSIVE_UTC = "2026-07-01T00:00:00Z"
+MODEL_START_UTC = "2024-01-19T12:00:00Z"
+# 2026-06-30 is in CDT (UTC-05), so this keeps the full local delivery day.
+MODEL_END_EXCLUSIVE_UTC = "2026-07-01T05:00:00Z"
 
 MODEL_TABLE = "model_wide_hourly_2024_2026"
 SPLIT_TABLE = "model_split_assignments_2024_2026"
@@ -36,6 +37,62 @@ REQUIRED_OBJECTS = {
 
 MODEL_SQL = f"""
 CREATE TABLE {MODEL_TABLE} AS
+WITH forecast_merged AS (
+    SELECT
+        delivery_hour_utc,
+        MAX(load_forecast_issue_time_utc)
+            AS load_forecast_issue_time_utc,
+        MAX(wind_forecast_issue_time_utc)
+            AS wind_forecast_issue_time_utc,
+        MAX(solar_forecast_issue_time_utc)
+            AS solar_forecast_issue_time_utc,
+        MAX(load_source_product_id) AS load_source_product_id,
+        MAX(wind_source_product_id) AS wind_source_product_id,
+        MAX(solar_source_product_id) AS solar_source_product_id,
+        MAX(load_coast_mw) AS load_coast_mw,
+        MAX(load_east_mw) AS load_east_mw,
+        MAX(load_far_west_mw) AS load_far_west_mw,
+        MAX(load_north_mw) AS load_north_mw,
+        MAX(load_north_central_mw) AS load_north_central_mw,
+        MAX(load_south_central_mw) AS load_south_central_mw,
+        MAX(load_southern_mw) AS load_southern_mw,
+        MAX(load_west_mw) AS load_west_mw,
+        MAX(load_system_total_mw) AS load_system_total_mw,
+        MAX(wind_stwpf_lz_north_mw) AS wind_stwpf_lz_north_mw,
+        MAX(wind_stwpf_lz_south_houston_mw)
+            AS wind_stwpf_lz_south_houston_mw,
+        MAX(wind_stwpf_lz_west_mw) AS wind_stwpf_lz_west_mw,
+        MAX(wind_stwpf_system_wide_mw)
+            AS wind_stwpf_system_wide_mw,
+        MAX(wind_wgrpp_lz_north_mw) AS wind_wgrpp_lz_north_mw,
+        MAX(wind_wgrpp_lz_south_houston_mw)
+            AS wind_wgrpp_lz_south_houston_mw,
+        MAX(wind_wgrpp_lz_west_mw) AS wind_wgrpp_lz_west_mw,
+        MAX(wind_wgrpp_system_wide_mw)
+            AS wind_wgrpp_system_wide_mw,
+        MAX(solar_pvgrpp_system_mw) AS solar_pvgrpp_system_mw,
+        MAX(solar_stppf_system_mw) AS solar_stppf_system_mw,
+        MAX(has_load_forecast) AS has_load_forecast,
+        MAX(has_wind_forecast) AS has_wind_forecast,
+        MAX(has_solar_forecast) AS has_solar_forecast,
+        CASE
+            WHEN MAX(has_load_forecast) = 1
+             AND MAX(has_wind_forecast) = 1
+             AND MAX(has_solar_forecast) = 1
+            THEN 1 ELSE 0
+        END AS has_all_three_forecasts,
+        MAX(load_pre_dam_valid) AS load_pre_dam_valid,
+        MAX(wind_pre_dam_valid) AS wind_pre_dam_valid,
+        MAX(solar_pre_dam_valid) AS solar_pre_dam_valid,
+        CASE
+            WHEN MAX(load_pre_dam_valid) = 1
+             AND MAX(wind_pre_dam_valid) = 1
+             AND MAX(solar_pre_dam_valid) = 1
+            THEN 1 ELSE 0
+        END AS all_issue_times_pre_dam_valid
+    FROM feature_pre_dam_forecast_hourly
+    GROUP BY delivery_hour_utc
+)
 SELECT
     p.delivery_hour_utc,
     p.location,
@@ -62,6 +119,10 @@ SELECT
     g.gas_availability_assumption,
 
     w.dfw_city_count,
+    w.forecast_run_time_utc AS weather_forecast_run_time_utc,
+    w.decision_cutoff_utc AS weather_decision_cutoff_utc,
+    w.forecast_model AS weather_forecast_model,
+    w.forecast_lead_hours AS weather_forecast_lead_hours,
     w.temperature_dfw_mean_c,
     w.temperature_dfw_min_c,
     w.temperature_dfw_max_c,
@@ -154,7 +215,7 @@ JOIN feature_time_hourly AS t
   ON t.delivery_hour_utc = p.delivery_hour_utc
 JOIN feature_weather_hourly AS w
   ON w.target_hour_utc = p.delivery_hour_utc
-JOIN feature_pre_dam_forecast_hourly AS f
+JOIN forecast_merged AS f
   ON f.delivery_hour_utc = p.delivery_hour_utc
 JOIN feature_gas_da_daily AS g
   ON g.decision_date_local = t.decision_date_local
@@ -187,28 +248,33 @@ def _required_objects_exist(connection: sqlite3.Connection) -> None:
 
 
 def _create_split_assignments(connection: sqlite3.Connection) -> None:
-    keys = [
-        row[0]
+    rows = [
+        (row[0], row[1])
         for row in connection.execute(
-            f"SELECT delivery_hour_utc FROM {MODEL_TABLE} "
+            f"SELECT delivery_hour_utc, delivery_date_local "
+            f"FROM {MODEL_TABLE} "
             "ORDER BY delivery_hour_utc"
         )
     ]
-    if not keys:
+    if not rows:
         raise RuntimeError("No rows available for model split assignments")
 
-    train_end = int(len(keys) * 0.70)
-    validation_end = int(len(keys) * 0.85)
-    assignments: list[tuple[str, str]] = []
-    for index, key in enumerate(keys):
-        split = (
+    delivery_dates = list(dict.fromkeys(row[1] for row in rows))
+    train_end = int(len(delivery_dates) * 0.70)
+    validation_end = int(len(delivery_dates) * 0.85)
+    date_splits: dict[str, str] = {}
+    for index, delivery_date in enumerate(delivery_dates):
+        date_splits[delivery_date] = (
             "train"
             if index < train_end
             else "validation"
             if index < validation_end
             else "test"
         )
-        assignments.append((key, split))
+
+    assignments: list[tuple[str, str]] = []
+    for key, delivery_date in rows:
+        assignments.append((key, date_splits[delivery_date]))
 
     connection.execute(
         f"""
@@ -362,6 +428,37 @@ def _write_qc(connection: sqlite3.Connection) -> None:
         passed=leakage_rows == 0,
     )
 
+    weather_leakage_rows = connection.execute(
+        f"""
+        SELECT COUNT(*) FROM {MODEL_TABLE}
+        WHERE weather_forecast_run_time_utc >= weather_decision_cutoff_utc
+        """
+    ).fetchone()[0]
+    add_check(
+        "weather_pre_dam_validity",
+        weather_leakage_rows,
+        0,
+        "Weather model runs must be initialized before the day-ahead decision cutoff.",
+        passed=weather_leakage_rows == 0,
+    )
+
+    weather_lead_mismatches = connection.execute(
+        f"""
+        SELECT COUNT(*) FROM {MODEL_TABLE}
+        WHERE (ercot_local_hour <= 8
+               AND ABS(weather_forecast_lead_hours - 24.0) > 0.01)
+           OR (ercot_local_hour >= 9
+               AND ABS(weather_forecast_lead_hours - 48.0) > 0.01)
+        """
+    ).fetchone()[0]
+    add_check(
+        "weather_hybrid_lead_rule",
+        weather_lead_mismatches,
+        0,
+        "Local hours 00-08 use day1; local hours 09-23 use day2.",
+        passed=weather_lead_mismatches == 0,
+    )
+
     missing_forecasts = connection.execute(
         f"""
         SELECT COUNT(*) FROM {MODEL_TABLE}
@@ -374,6 +471,54 @@ def _write_qc(connection: sqlite3.Connection) -> None:
         0,
         "Rows missing load, wind, or solar forecast values are excluded from the strict model table.",
         passed=missing_forecasts == 0,
+    )
+
+    unmerged_fragments = connection.execute(
+        f"""
+        SELECT COUNT(*)
+        FROM (
+            SELECT delivery_hour_utc
+            FROM feature_pre_dam_forecast_hourly
+            WHERE delivery_hour_utc >= '{MODEL_START_UTC}'
+              AND delivery_hour_utc < '{MODEL_END_EXCLUSIVE_UTC}'
+            GROUP BY delivery_hour_utc
+            HAVING COUNT(*) > 1
+               AND MAX(has_load_forecast) = 1
+               AND MAX(has_wind_forecast) = 1
+               AND MAX(has_solar_forecast) = 1
+               AND MAX(load_pre_dam_valid) = 1
+               AND MAX(wind_pre_dam_valid) = 1
+               AND MAX(solar_pre_dam_valid) = 1
+        ) AS fragmented
+        LEFT JOIN {MODEL_TABLE} AS model
+          ON model.delivery_hour_utc = fragmented.delivery_hour_utc
+        WHERE model.delivery_hour_utc IS NULL
+        """
+    ).fetchone()[0]
+    add_check(
+        "forecast_fragments_merged",
+        unmerged_fragments,
+        0,
+        "Complete forecast products split across duplicate UTC rows are merged before the strict join.",
+        passed=unmerged_fragments == 0,
+    )
+
+    incomplete_labels_retained = connection.execute(
+        f"""
+        SELECT COUNT(*)
+        FROM {MODEL_TABLE} AS model
+        JOIN clean_price_hourly AS price
+          ON price.delivery_hour_utc = model.delivery_hour_utc
+         AND price.location = model.location
+        WHERE price.is_label_complete <> 1
+        """
+    ).fetchone()[0]
+    add_check(
+        "incomplete_rt_labels_excluded",
+        incomplete_labels_retained,
+        0,
+        "Hours without all four 15-minute RT intervals are excluded rather than imputed.",
+        passed=incomplete_labels_retained == 0,
     )
 
     missing_gas = connection.execute(
@@ -410,6 +555,24 @@ def _write_qc(connection: sqlite3.Connection) -> None:
             set(split_counts) == {"train", "validation", "test"}
             and sum(split_counts.values()) == row_count
         ),
+    )
+
+    split_delivery_dates = connection.execute(
+        f"""
+        SELECT COUNT(*) FROM (
+            SELECT delivery_date_local
+            FROM {MODEL_TABLE}
+            GROUP BY delivery_date_local
+            HAVING COUNT(DISTINCT split_name) > 1
+        )
+        """
+    ).fetchone()[0]
+    add_check(
+        "whole_delivery_date_split",
+        split_delivery_dates,
+        0,
+        "All UTC hours belonging to one ERCOT local delivery date remain in the same split.",
+        passed=split_delivery_dates == 0,
     )
 
     connection.executemany(

@@ -16,7 +16,7 @@ DEFAULT_RAW_DATABASE = DATA_WORKSPACE / "interim" / "ercot_data.sqlite"
 DEFAULT_ANALYTICS_DATABASE = (
     DATA_WORKSPACE / "interim" / "ercot_analytics.sqlite"
 )
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 6
 ERCOT_TIMEZONE = ZoneInfo("America/Chicago")
 
 WEATHER_LOCATIONS = (
@@ -93,6 +93,11 @@ CREATE TABLE clean_price_hourly (
 CREATE TABLE clean_weather_hourly (
     city TEXT NOT NULL,
     target_hour_utc TEXT NOT NULL,
+    delivery_date_local TEXT NOT NULL,
+    forecast_run_time_utc TEXT NOT NULL,
+    decision_cutoff_utc TEXT NOT NULL,
+    forecast_model TEXT NOT NULL,
+    forecast_lead_hours REAL NOT NULL,
     temperature_2m_c REAL,
     relative_humidity_2m_pct REAL,
     wind_speed_10m_ms REAL,
@@ -105,7 +110,11 @@ CREATE TABLE clean_weather_hourly (
     source_file_id INTEGER NOT NULL,
     source_record_id INTEGER NOT NULL,
     PRIMARY KEY (city, target_hour_utc),
-    CHECK (target_hour_utc GLOB '????-??-??T??:??:??Z')
+    CHECK (target_hour_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (forecast_run_time_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (decision_cutoff_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (forecast_run_time_utc < decision_cutoff_utc),
+    CHECK (forecast_lead_hours > 0)
 ) WITHOUT ROWID;
 
 CREATE TABLE clean_gas_daily (
@@ -134,6 +143,11 @@ CREATE TABLE clean_load_forecast (
 
 CREATE TABLE feature_weather_hourly (
     target_hour_utc TEXT PRIMARY KEY,
+    delivery_date_local TEXT NOT NULL,
+    forecast_run_time_utc TEXT NOT NULL,
+    decision_cutoff_utc TEXT NOT NULL,
+    forecast_model TEXT NOT NULL,
+    forecast_lead_hours REAL NOT NULL,
     dfw_city_count INTEGER NOT NULL,
     temperature_dfw_mean_c REAL NOT NULL,
     temperature_dfw_min_c REAL NOT NULL,
@@ -171,7 +185,10 @@ CREATE TABLE feature_weather_hourly (
     rainy_city_count INTEGER NOT NULL,
     availability_assumption TEXT NOT NULL,
     CHECK (dfw_city_count = 5),
-    CHECK (target_hour_utc GLOB '????-??-??T??:??:??Z')
+    CHECK (target_hour_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (forecast_run_time_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (decision_cutoff_utc GLOB '????-??-??T??:??:??Z'),
+    CHECK (forecast_run_time_utc < decision_cutoff_utc)
 ) WITHOUT ROWID;
 
 CREATE TABLE quality_check_results (
@@ -410,6 +427,20 @@ WITH ranked AS (
         END AS city,
         strftime('%Y-%m-%dT%H:%M:%SZ', r.interval_start_utc)
             AS target_hour_utc,
+        json_extract(r.record_json, '$.delivery_date_local')
+            AS delivery_date_local,
+        json_extract(r.record_json, '$.forecast_run_time_utc')
+            AS forecast_run_time_utc,
+        json_extract(r.record_json, '$.decision_cutoff_utc')
+            AS decision_cutoff_utc,
+        json_extract(r.record_json, '$.forecast_model')
+            AS forecast_model,
+        ROUND(
+            (julianday(strftime('%Y-%m-%dT%H:%M:%SZ', r.interval_start_utc))
+             - julianday(json_extract(r.record_json, '$.forecast_run_time_utc')))
+            * 24.0,
+            3
+        ) AS forecast_lead_hours,
         CAST(json_extract(r.record_json, '$.temperature_2m') AS REAL)
             AS temperature_2m_c,
         CAST(json_extract(r.record_json, '$.relative_humidity_2m') AS REAL)
@@ -424,6 +455,10 @@ WITH ranked AS (
             AS shortwave_radiation_wm2,
         CAST(json_extract(r.record_json, '$.precipitation') AS REAL)
             AS precipitation_mm,
+        COALESCE(
+            json_extract(r.record_json, '$.availability_assumption'),
+            'single_run_initialization_before_pre_dam_cutoff'
+        ) AS availability_assumption,
         f.dataset AS source_dataset,
         f.file_id AS source_file_id,
         r.record_id AS source_record_id,
@@ -436,6 +471,7 @@ WITH ranked AS (
                 END,
                 strftime('%Y-%m-%dT%H:%M:%SZ', r.interval_start_utc)
             ORDER BY
+                COALESCE(json_extract(r.record_json, '$.forecast_run_time_utc'), '') DESC,
                 COALESCE(f.collected_at_utc, '') DESC,
                 f.imported_at_utc DESC,
                 r.record_id DESC
@@ -443,20 +479,32 @@ WITH ranked AS (
     FROM raw.raw_records AS r
     JOIN raw.raw_files AS f ON f.file_id = r.file_id
     WHERE f.source = 'openmeteo'
-      AND f.dataset IN (
-          'historical-forecast_Dallas',
-          'historical-forecast_Fort_Worth',
-          'historical-forecast_Denton',
-          'historical-forecast_McKinney',
-          'historical-forecast_Arlington',
-          'historical-forecast_Wichita_Falls'
+      AND f.dataset = 'previous-runs-hybrid'
+      AND r.location IN (
+          'Dallas', 'Fort_Worth', 'Denton', 'McKinney',
+          'Arlington', 'Wichita_Falls',
+          'Fort Worth', 'Wichita Falls'
       )
       AND r.interval_start_utc IS NOT NULL
+      AND json_extract(r.record_json, '$.forecast_run_time_utc') IS NOT NULL
+      AND json_extract(r.record_json, '$.decision_cutoff_utc') IS NOT NULL
+      AND json_extract(r.record_json, '$.temperature_2m') IS NOT NULL
+      AND json_extract(r.record_json, '$.relative_humidity_2m') IS NOT NULL
+      AND json_extract(r.record_json, '$.wind_speed_10m') IS NOT NULL
+      AND json_extract(r.record_json, '$.wind_gusts_10m') IS NOT NULL
+      AND json_extract(r.record_json, '$.cloud_cover') IS NOT NULL
+      AND json_extract(r.record_json, '$.shortwave_radiation') IS NOT NULL
+      AND json_extract(r.record_json, '$.precipitation') IS NOT NULL
 )
 INSERT INTO clean_weather_hourly
 SELECT
     city,
     target_hour_utc,
+    delivery_date_local,
+    forecast_run_time_utc,
+    decision_cutoff_utc,
+    forecast_model,
+    forecast_lead_hours,
     temperature_2m_c,
     relative_humidity_2m_pct,
     wind_speed_10m_ms,
@@ -464,13 +512,26 @@ SELECT
     cloud_cover_pct,
     shortwave_radiation_wm2,
     precipitation_mm,
-    'historical_forecast_without_publish_time',
+    availability_assumption,
     source_dataset,
     source_file_id,
     source_record_id
 FROM ranked
 WHERE duplicate_rank = 1
   AND target_hour_utc IS NOT NULL
+  AND delivery_date_local IS NOT NULL
+  AND forecast_run_time_utc IS NOT NULL
+  AND decision_cutoff_utc IS NOT NULL
+  AND forecast_model IS NOT NULL
+  AND forecast_lead_hours > 0
+  AND forecast_run_time_utc < decision_cutoff_utc
+  AND temperature_2m_c IS NOT NULL
+  AND relative_humidity_2m_pct IS NOT NULL
+  AND wind_speed_10m_ms IS NOT NULL
+  AND wind_gusts_10m_ms IS NOT NULL
+  AND cloud_cover_pct IS NOT NULL
+  AND shortwave_radiation_wm2 IS NOT NULL
+  AND precipitation_mm IS NOT NULL
 """
 
 
@@ -478,6 +539,12 @@ WEATHER_FEATURE_INSERT_SQL = """
 WITH dfw AS (
     SELECT
         target_hour_utc,
+        MIN(delivery_date_local) AS delivery_date_local,
+        MIN(forecast_run_time_utc) AS forecast_run_time_utc,
+        MIN(decision_cutoff_utc) AS decision_cutoff_utc,
+        MIN(forecast_model) AS forecast_model,
+        MIN(forecast_lead_hours) AS forecast_lead_hours,
+        MIN(availability_assumption) AS availability_assumption,
         COUNT(*) AS city_count,
         AVG(temperature_2m_c) AS temperature_mean,
         MIN(temperature_2m_c) AS temperature_min,
@@ -523,6 +590,11 @@ north_extremes AS (
 INSERT INTO feature_weather_hourly
 SELECT
     dfw.target_hour_utc,
+    dfw.delivery_date_local,
+    dfw.forecast_run_time_utc,
+    dfw.decision_cutoff_utc,
+    dfw.forecast_model,
+    dfw.forecast_lead_hours,
     dfw.city_count,
     dfw.temperature_mean,
     dfw.temperature_min,
@@ -558,7 +630,7 @@ SELECT
     north_extremes.extreme_heat_city_count,
     north_extremes.high_wind_city_count,
     north_extremes.rainy_city_count,
-    'historical_forecast_without_publish_time'
+    dfw.availability_assumption
 FROM dfw
 JOIN wichita ON wichita.target_hour_utc = dfw.target_hour_utc
 JOIN north_extremes
@@ -989,7 +1061,11 @@ def _write_build_info(
             WEATHER_LOCATIONS, ensure_ascii=True
         ),
         "weather_availability_assumption": (
-            "historical_forecast_without_publish_time"
+            "openmeteo_previous_day1_local_hours_00_08_else_day2_before_pre_dam_cutoff"
+        ),
+        "weather_forecast_source": "openmeteo_previous_runs_hybrid",
+        "weather_run_selection_rule": (
+            "previous_day1_for_local_hours_00_08_else_previous_day2"
         ),
         "weather_extreme_thresholds": json.dumps(
             {
@@ -1072,6 +1148,34 @@ def _write_quality_checks(connection: sqlite3.Connection) -> None:
         0,
         "Duplicate key is city + target_hour_utc.",
         passed=duplicate_weather == 0,
+    )
+
+    weather_after_cutoff = connection.execute(
+        """
+        SELECT COUNT(*) FROM clean_weather_hourly
+        WHERE forecast_run_time_utc >= decision_cutoff_utc
+        """
+    ).fetchone()[0]
+    add_check(
+        "weather_run_before_pre_dam_cutoff",
+        weather_after_cutoff,
+        0,
+        "Every weather run must be initialized before the 09:55 America/Chicago cutoff.",
+        passed=weather_after_cutoff == 0,
+    )
+
+    invalid_weather_lead = connection.execute(
+        """
+        SELECT COUNT(*) FROM clean_weather_hourly
+        WHERE forecast_lead_hours NOT IN (24.0, 48.0)
+        """
+    ).fetchone()[0]
+    add_check(
+        "weather_hybrid_lead_values",
+        invalid_weather_lead,
+        0,
+        "Hybrid Previous Runs weather must use only 24-hour or 48-hour leads.",
+        passed=invalid_weather_lead == 0,
     )
 
     expected_feature_hours = connection.execute(
@@ -1204,7 +1308,11 @@ def _write_quality_checks(connection: sqlite3.Connection) -> None:
         ("clean_rt_price_hourly", "delivery_hour_utc"),
         ("clean_price_hourly", "delivery_hour_utc"),
         ("clean_weather_hourly", "target_hour_utc"),
+        ("clean_weather_hourly", "forecast_run_time_utc"),
+        ("clean_weather_hourly", "decision_cutoff_utc"),
         ("feature_weather_hourly", "target_hour_utc"),
+        ("feature_weather_hourly", "forecast_run_time_utc"),
+        ("feature_weather_hourly", "decision_cutoff_utc"),
         ("feature_time_hourly", "delivery_hour_utc"),
         ("feature_time_hourly", "decision_time_utc"),
         ("feature_load_da_hourly", "delivery_hour_utc"),
@@ -1288,7 +1396,11 @@ def _validate_clean_database(
         ("clean_rt_price_hourly", "delivery_hour_utc"),
         ("clean_price_hourly", "delivery_hour_utc"),
         ("clean_weather_hourly", "target_hour_utc"),
+        ("clean_weather_hourly", "forecast_run_time_utc"),
+        ("clean_weather_hourly", "decision_cutoff_utc"),
         ("feature_weather_hourly", "target_hour_utc"),
+        ("feature_weather_hourly", "forecast_run_time_utc"),
+        ("feature_weather_hourly", "decision_cutoff_utc"),
         ("feature_time_hourly", "delivery_hour_utc"),
         ("feature_time_hourly", "decision_time_utc"),
         ("feature_load_da_hourly", "delivery_hour_utc"),

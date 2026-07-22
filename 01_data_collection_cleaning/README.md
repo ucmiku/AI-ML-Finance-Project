@@ -189,14 +189,15 @@ view. Query `quality_check_results` before any model export.
 The model delivery view uses a 09:55 America/Chicago cutoff on the day before
 delivery. UTC remains the join key; ERCOT local time is retained as a derived
 feature. The default split is chronological 70% train, 15% validation, and 15%
-test. Gas values are available on the next business day and are forward-filled
-only. The current load forecast source has only 168 complete as-of hours, so
-load coverage must be checked before using it as a model input.
+test by complete ERCOT local delivery date. Gas values are available on the
+next business day and are forward-filled only.
 
 Build the strict 2024-2026 model-wide table after the pre-DAM forecast feature
 table has been imported:
 
 ```powershell
+python 01_data_collection_cleaning/scripts/import_pre_dam_forecast_features.py `
+  --source-csv "01_data_collection_cleaning/ercot_pre_dam_forecast_features_2024-01_to_2026-06(1).csv"
 python 01_data_collection_cleaning/scripts/build_model_wide.py
 ```
 
@@ -204,11 +205,14 @@ This creates `model_wide_hourly_2024_2026`,
 `model_split_assignments_2024_2026`, and
 `model_wide_quality_check_results` in
 `01_data_collection_cleaning/interim/ercot_analytics.sqlite`. It also exports
-`01_data_collection_cleaning/processed/model_wide_hourly_2024_2026.csv`.
+`01_data_collection_cleaning/processed/model_wide_hourly_2024_2026_final.csv`.
 The final table uses `delivery_hour_utc` as the single UTC join key, keeps
 ERCOT local time fields as model features, requires complete price labels and
 pre-DAM-valid load/wind/solar forecasts, and uses a chronological 70/15/15
-split computed only on the final 2024-2026 rows.
+split computed only on the final 2024-2026 local delivery dates. Forecast
+products split across duplicate UTC rows during spring DST are merged before
+the strict join. Hours without a pre-DAM load forecast and hours with
+incomplete RT labels are excluded without interpolation.
 
 All timestamp columns use canonical UTC strings such as
 `2025-01-01T06:00:00Z`. FRED observation and vintage values remain dates

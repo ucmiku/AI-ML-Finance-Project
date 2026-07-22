@@ -85,22 +85,29 @@ class CleanDatabaseTests(unittest.TestCase):
             old_weather = self._insert_file(
                 connection,
                 source="openmeteo",
-                dataset="historical-forecast_Dallas",
+                dataset="previous-runs-hybrid",
                 collected_at="2025-01-01T00:00:00Z",
             )
             new_weather = self._insert_file(
                 connection,
                 source="openmeteo",
-                dataset="historical-forecast_Dallas",
+                dataset="previous-runs-hybrid",
                 collected_at="2025-01-02T00:00:00Z",
             )
             ignored_weather = self._insert_file(
                 connection,
                 source="openmeteo",
-                dataset="historical-forecast_Austin",
-                collected_at="2025-01-02T00:00:00Z",
+                dataset="previous-runs-hybrid",
+                collected_at="2025-01-02T00:00:01Z",
             )
             weather = {
+                "delivery_date_local": "2025-01-01",
+                "forecast_run_time_utc": "2024-12-30T00:00:00Z",
+                "decision_cutoff_utc": "2024-12-31T15:55:00Z",
+                "forecast_model": "openmeteo_previous_runs_default_model",
+                "availability_assumption": (
+                    "openmeteo_previous_day1_local_hours_00_08_else_day2_before_pre_dam_cutoff"
+                ),
                 "temperature_2m": 10.0,
                 "relative_humidity_2m": 50,
                 "wind_speed_10m": 3.0,
@@ -108,6 +115,10 @@ class CleanDatabaseTests(unittest.TestCase):
                 "cloud_cover": 20,
                 "shortwave_radiation": 100.0,
                 "precipitation": 0.0,
+            }
+            weather_06 = {
+                **weather,
+                "forecast_run_time_utc": "2024-12-31T06:00:00Z",
             }
             self._insert_record(
                 connection,
@@ -129,7 +140,7 @@ class CleanDatabaseTests(unittest.TestCase):
                 connection,
                 file_id=new_weather,
                 record_number=2,
-                record=weather,
+                record=weather_06,
                 interval="2025-01-01T06:00",
                 location="Dallas",
             )
@@ -141,18 +152,18 @@ class CleanDatabaseTests(unittest.TestCase):
                 interval="2025-01-01T00:00",
                 location="Austin",
             )
-            for location, temperature in (
+            for file_index, (location, temperature) in enumerate((
                 ("Fort_Worth", 10.0),
                 ("Denton", 10.0),
                 ("McKinney", 10.0),
                 ("Arlington", 10.0),
                 ("Wichita_Falls", 8.0),
-            ):
+            ), start=2):
                 location_file = self._insert_file(
                     connection,
                     source="openmeteo",
-                    dataset=f"historical-forecast_{location}",
-                    collected_at="2025-01-02T00:00:00Z",
+                    dataset="previous-runs-hybrid",
+                    collected_at=f"2025-01-02T00:00:{file_index:02d}Z",
                 )
                 self._insert_record(
                     connection,
@@ -166,7 +177,7 @@ class CleanDatabaseTests(unittest.TestCase):
                     connection,
                     file_id=location_file,
                     record_number=2,
-                    record=weather,
+                    record=weather_06,
                     interval="2025-01-01T06:00",
                     location=location,
                 )
@@ -347,7 +358,7 @@ class CleanDatabaseTests(unittest.TestCase):
                     clean.execute(
                         "SELECT COUNT(*) FROM quality_check_results"
                     ).fetchone()[0],
-                    12,
+                    14,
                 )
                 self.assertIsNone(
                     clean.execute(

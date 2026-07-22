@@ -18,7 +18,9 @@ from collectors.gridstatus_collector import (
 from collectors.openmeteo_collector import (
     DEFAULT_TEXAS_LOCATIONS,
     WeatherLocation,
+    collect_openmeteo_previous_runs_weather,
     collect_openmeteo_weather,
+    collect_openmeteo_single_run_weather,
     parse_location,
 )
 
@@ -64,7 +66,13 @@ def _add_force_argument(parser: argparse.ArgumentParser) -> None:
 def _add_weather_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--weather-mode",
-        choices=("historical-forecast", "forecast"),
+        choices=(
+            "historical-forecast",
+            "forecast",
+            "single-run",
+            "previous-runs-day2",
+            "previous-runs-hybrid",
+        ),
         default="historical-forecast",
         help="Open-Meteo endpoint to use",
     )
@@ -80,6 +88,18 @@ def _add_weather_arguments(parser: argparse.ArgumentParser) -> None:
         type=int,
         default=31,
         help="Days per Open-Meteo request (default: 31)",
+    )
+    parser.add_argument(
+        "--weather-model",
+        default="ecmwf_ifs",
+        help="Open-Meteo Single Runs model (default: ecmwf_ifs)",
+    )
+    parser.add_argument(
+        "--weather-run-hour-utc",
+        type=int,
+        default=0,
+        choices=(0, 12),
+        help="Single Runs initialization hour UTC (default: 00Z)",
     )
 
 
@@ -245,17 +265,49 @@ def run(args: argparse.Namespace) -> list[dict[str, Any]]:
 
     if args.command in {"weather", "all"}:
         LOGGER.info("Collecting Open-Meteo weather from %s through %s", start, end)
-        results.extend(
-            collect_openmeteo_weather(
-                start,
-                end,
-                locations=_weather_locations(args.weather_location),
-                mode=args.weather_mode,
-                chunk_days=args.weather_chunk_days,
-                raw_root=raw_root,
-                skip_existing=not args.force,
+        if args.weather_mode in {
+            "previous-runs-day2",
+            "previous-runs-hybrid",
+        }:
+            results.extend(
+                collect_openmeteo_previous_runs_weather(
+                    start,
+                    end,
+                    locations=_weather_locations(args.weather_location),
+                    chunk_days=args.weather_chunk_days,
+                    raw_root=raw_root,
+                    skip_existing=not args.force,
+                    lead_mode=(
+                        "hybrid"
+                        if args.weather_mode == "previous-runs-hybrid"
+                        else "day2"
+                    ),
+                )
             )
-        )
+        elif args.weather_mode == "single-run":
+            results.extend(
+                collect_openmeteo_single_run_weather(
+                    start,
+                    end,
+                    locations=_weather_locations(args.weather_location),
+                    model=args.weather_model,
+                    run_hour_utc=args.weather_run_hour_utc,
+                    raw_root=raw_root,
+                    skip_existing=not args.force,
+                )
+            )
+        else:
+            results.extend(
+                collect_openmeteo_weather(
+                    start,
+                    end,
+                    locations=_weather_locations(args.weather_location),
+                    mode=args.weather_mode,
+                    chunk_days=args.weather_chunk_days,
+                    raw_root=raw_root,
+                    skip_existing=not args.force,
+                )
+            )
 
     if args.command in {"gas", "all"}:
         LOGGER.info("Collecting FRED series %s", args.series_id)

@@ -5,7 +5,7 @@ import json
 import sys
 import tempfile
 import unittest
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -24,6 +24,8 @@ from collectors.gridstatus_collector import (  # noqa: E402
 from collectors.openmeteo_collector import (  # noqa: E402
     DEFAULT_TEXAS_LOCATIONS,
     WeatherLocation,
+    collect_openmeteo_previous_runs_weather,
+    collect_openmeteo_single_run_weather,
     collect_openmeteo_weather,
     parse_location,
 )
@@ -145,6 +147,110 @@ class CollectorTests(unittest.TestCase):
             )[0]
             self.assertEqual(resumed["status"], "skipped_existing")
             self.assertEqual(len(session.calls), 1)
+
+    def test_openmeteo_single_run_uses_one_run_for_delivery_day(self) -> None:
+        first_hour = datetime(2025, 1, 1, 0)
+        times = [
+            (first_hour + timedelta(hours=index)).strftime("%Y-%m-%dT%H:%M")
+            for index in range(72)
+        ]
+        payload = {
+            "latitude": 32.78,
+            "longitude": -96.80,
+            "hourly_units": {"temperature_2m": "degC"},
+            "hourly": {
+                "time": times,
+                "temperature_2m": [float(index) for index in range(72)],
+            },
+        }
+        session = FakeSession(payload)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = collect_openmeteo_single_run_weather(
+                date(2025, 1, 2),
+                date(2025, 1, 2),
+                locations=(WeatherLocation("Dallas", 32.7767, -96.7970),),
+                hourly_variables=("temperature_2m",),
+                raw_root=Path(temp_dir),
+                session=session,
+            )[0]
+
+            self.assertEqual(result["row_count"], 24)
+            self.assertEqual(
+                result["forecast_run_time_utc"], "2025-01-01T00:00:00Z"
+            )
+            self.assertEqual(session.calls[0][1]["models"], "ecmwf_ifs")
+            self.assertEqual(session.calls[0][1]["forecast_days"], 10)
+            with gzip.open(result["data_path"], "rt", encoding="utf-8") as handle:
+                saved = json.load(handle)
+            location = saved["locations"][0]
+            self.assertEqual(location["delivery_date_local"], "2025-01-02")
+            self.assertEqual(location["hourly"]["time"][0], "2025-01-02T06:00")
+            self.assertEqual(location["hourly"]["time"][-1], "2025-01-03T05:00")
+
+    def test_openmeteo_previous_runs_normalizes_day2_variables(self) -> None:
+        payload = {
+            "latitude": 32.78,
+            "longitude": -96.80,
+            "hourly_units": {"temperature_2m_previous_day2": "degC"},
+            "hourly": {
+                "time": ["2025-01-01T06:00", "2025-01-01T07:00"],
+                "temperature_2m_previous_day2": [10.0, 11.0],
+            },
+        }
+        session = FakeSession(payload)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = collect_openmeteo_previous_runs_weather(
+                date(2025, 1, 1),
+                date(2025, 1, 1),
+                locations=(WeatherLocation("Dallas", 32.7767, -96.7970),),
+                hourly_variables=("temperature_2m",),
+                raw_root=Path(temp_dir),
+                session=session,
+                request_delay_seconds=0,
+            )[0]
+
+            self.assertEqual(result["row_count"], 2)
+            with gzip.open(result["data_path"], "rt", encoding="utf-8") as handle:
+                saved = json.load(handle)
+            hourly = saved["locations"][0]["hourly"]
+            self.assertEqual(hourly["temperature_2m"], [10.0, 11.0])
+            self.assertEqual(
+                hourly["forecast_run_time_utc"][0],
+                "2024-12-30T06:00:00Z",
+            )
+
+    def test_openmeteo_previous_runs_hybrid_selects_by_local_hour(self) -> None:
+        payload = {
+            "latitude": 32.78,
+            "longitude": -96.80,
+            "hourly": {
+                "time": ["2025-01-01T06:00", "2025-01-01T15:00"],
+                "temperature_2m_previous_day1": [10.0, 11.0],
+                "temperature_2m_previous_day2": [20.0, 21.0],
+            },
+        }
+        session = FakeSession(payload)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result = collect_openmeteo_previous_runs_weather(
+                date(2025, 1, 1),
+                date(2025, 1, 1),
+                locations=(WeatherLocation("Dallas", 32.7767, -96.7970),),
+                hourly_variables=("temperature_2m",),
+                raw_root=Path(temp_dir),
+                session=session,
+                request_delay_seconds=0,
+                lead_mode="hybrid",
+            )[0]
+
+            with gzip.open(result["data_path"], "rt", encoding="utf-8") as handle:
+                saved = json.load(handle)
+            hourly = saved["locations"][0]["hourly"]
+            self.assertEqual(hourly["temperature_2m"], [10.0, 21.0])
+            self.assertEqual(hourly["forecast_lead_hours"], [24, 48])
+            self.assertEqual(
+                hourly["forecast_run_time_utc"],
+                ["2024-12-31T06:00:00Z", "2024-12-30T15:00:00Z"],
+            )
 
     def test_gridstatusio_saves_filtered_north_hub_response(self) -> None:
         client = FakeGridStatusClient()
