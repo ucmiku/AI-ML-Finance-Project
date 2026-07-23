@@ -1,0 +1,28 @@
+output_head,feature_group,mean_abs_shap
+negative_probability_C1_logit,Calendar,0.45748463
+negative_probability_C1_logit,Gas,0.10985539
+negative_probability_C1_logit,Historical Spread,0.16911806
+negative_probability_C1_logit,Load,1.2454727
+negative_probability_C1_logit,Solar and Net Load,0.34517497
+negative_probability_C1_logit,Wind,0.09345095
+no_trade_probability_C3_logit,Calendar,0.38561398
+no_trade_probability_C3_logit,Gas,0.10209291
+no_trade_probability_C3_logit,Historical Spread,0.041620288
+no_trade_probability_C3_logit,Load,0.5886294
+no_trade_probability_C3_logit,Raw Weather,0.078707725
+no_trade_probability_C3_logit,Solar and Net Load,0.297096
+no_trade_probability_C3_logit,Wind,0.08174425
+positive_probability_C5_logit,Calendar,0.0426623
+positive_probability_C5_logit,Gas,0.055291485
+positive_probability_C5_logit,Historical Spread,0.2888356
+positive_probability_C5_logit,Load,0.67784905
+positive_probability_C5_logit,Raw Weather,0.20318045
+positive_probability_C5_logit,Solar and Net Load,0.08760686
+positive_probability_C5_logit,Wind,0.059108064
+q50_continuous_spread,Extreme Weather,0.050558925
+q50_continuous_spread,Gas,0.037129406
+q50_continuous_spread,Historical Spread,0.28047585
+q50_continuous_spread,Load,0.43848547
+q50_continuous_spread,Raw Weather,0.10759389
+q50_continuous_spread,Solar and Net Load,0.15735368
+q50_continuous_spread,Wind,0.08240268

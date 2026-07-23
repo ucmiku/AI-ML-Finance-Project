@@ -1,0 +1,24 @@
+{
+  "model_name": "C1_XGBoost_Prediction_Agent",
+  "model_version": "v3",
+  "selected_agent": "C1_best_boosting_complete_system",
+  "selection_based_on": "2025_OOF_only",
+  "selection_timestamp": "2026-07-22T08:46:36.437104+00:00",
+  "source_data_hash": "f5730506707c2f227f6208bb6bc00ca4c0c45fe5a23c3148c1e9c2c04cfa0717",
+  "feature_whitelist_hash": "0c6903cdbaca034b74f59dac8d014c57a04b3bfabb80b7c42b3ba7d6b3fd59de",
+  "components": {
+    "continuous_head": "B2A XGBoost Regression",
+    "classification_head": "B2B XGBoost 5/20 Classifier"
+  },
+  "run_ids": {
+    "b2a": "B2_regression_formal_v3r1_f5730506",
+    "b2b": "B2_classifier_5_20_formal_v3r1_f5730506",
+    "c1_system": "C_system_quality_econ_v3_f5730506"
+  },
+  "folds": [
+    "validation_fold_1",
+    "validation_fold_2",
+    "validation_fold_3"
+  ],
+  "production_note": "Packaged artifacts reproduce 2025 OOF fold predictions. A live production model should be retrained using the same frozen config on the approved training window."
+}
