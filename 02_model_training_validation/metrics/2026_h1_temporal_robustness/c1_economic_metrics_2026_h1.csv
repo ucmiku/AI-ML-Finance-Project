@@ -1,0 +1,2 @@
+system_id,period,research_label,rows,trade_count,total_pnl,pnl_per_mwh,sharpe_daily,max_drawdown_daily,win_rate_trade_hours,profitable_months,months,inc_trade_count,dec_trade_count,inc_pnl,dec_pnl
+C1_best_boosting_complete_system,2026_H1,frozen-rule post-hoc temporal robustness evaluation,4197,441,5705.049650000001,12.936620521541952,1.6765893894851231,-1610.047062499999,0.562358276643991,4,7,382,59,5559.475049999999,145.57460000000003

@@ -1,0 +1,15 @@
+{
+  "explainer": "TreeSHAP where available; existing source tables may mark fallback in explainer_config.",
+  "local_shap_supported": true,
+  "local_shap_heads": [
+    "spread_regression",
+    "predicted_class",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ],
+  "probability_sum_heads": "For p_negative/p_positive, do not fabricate additive SHAP. Explain component classes or predicted_class.",
+  "causal_warning": "SHAP is model explanation, not causal proof."
+}

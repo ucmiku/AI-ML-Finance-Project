@@ -1,0 +1,31 @@
+check_name,value,status
+row_count,4197,PASS
+model_ready_2026_h1_evaluation_eligible_rows,4197,PASS
+missing_vs_model_ready_evaluation_eligible,0,PASS
+extra_vs_model_ready_evaluation_eligible,0,PASS
+delivery_hour_utc_unique,True,PASS
+delivery_hour_utc_sorted,True,PASS
+min_delivery_hour_utc,2026-01-01 06:00:00+00:00,PASS
+max_delivery_hour_utc,2026-07-01 04:00:00+00:00,PASS
+weekly_manifest_rows,27,PASS
+walkforward_week_count,27,PASS
+prob_sum_min,0.9999999999999998,PASS
+prob_sum_max,1.0000000000000002,PASS
+prob_sum_bad_gt_1e_6,0,PASS
+p_negative_formula_bad_gt_1e_6,0,PASS
+p_neutral_formula_bad_gt_1e_6,0,PASS
+p_positive_formula_bad_gt_1e_6,0,PASS
+training_cutoff_missing,0,PASS
+training_cutoff_after_prediction_hour,0,PASS
+training_cutoff_not_strictly_before_prediction_hour,27,PASS
+b2a_b2b_same_delivery_hour_set,True,PASS
+is_weekly_expanding_walkforward,True,PASS
+not_single_2025_model_posthoc,True,PASS
+optuna_on_2026,False,PASS
+threshold_changed_on_2026,False,PASS
+inner_join_silent_drop,False,PASS
+research_label,frozen-rule post-hoc temporal robustness evaluation,PASS
+2026_used_for_model_selection,False,PASS
+2026_used_for_threshold_tuning,False,PASS
+training_cutoff_rule,training_cutoff_utc <= first hour of prediction week; no cutoff after predicted hour,PASS
+strictly_before_note,First hour of a weekly block can equal the cutoff timestamp label; script trains on rows with delivery_hour_utc < cutoff and predicts rows at/after cutoff.,INFO

@@ -1,0 +1,17 @@
+{
+  "delivery_hour_utc": "2025-01-01 06:00:00+00:00",
+  "predicted_spread": -0.22132727007071176,
+  "p_c1": 0.01064635493387703,
+  "p_c2": 0.12810971661471754,
+  "p_c3": 0.5022185076310741,
+  "p_c4": 0.25677373656081476,
+  "p_c5": 0.10225168425951654,
+  "p_negative": 0.13875607154859457,
+  "p_neutral": 0.5022185076310741,
+  "p_positive": 0.3590254208203313,
+  "predicted_class": "C3",
+  "confidence": 0.5022185076310741,
+  "signal": "NO_TRADE",
+  "model_version": "C1_v1_model_handoff_from_phase_C_v3",
+  "deployment_status": "demo_three_fold_ensemble"
+}
