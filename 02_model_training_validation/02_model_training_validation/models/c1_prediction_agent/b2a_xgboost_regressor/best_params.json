@@ -1,0 +1,16 @@
+{
+  "n_estimators": 545,
+  "learning_rate": 0.028860688010347246,
+  "max_depth": 7,
+  "min_child_weight": 9.480430895570752,
+  "subsample": 0.8430813543824859,
+  "colsample_bytree": 0.6861270358776069,
+  "reg_alpha": 0.00036657135693258424,
+  "reg_lambda": 14.300357234868288,
+  "random_state": 20260722,
+  "n_jobs": 2,
+  "tree_method": "hist",
+  "early_stopping_rounds": 50,
+  "objective": "reg:squarederror",
+  "eval_metric": "mae"
+}

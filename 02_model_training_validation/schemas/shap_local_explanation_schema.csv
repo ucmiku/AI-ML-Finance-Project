@@ -1,0 +1,15 @@
+field,type,description
+delivery_hour_utc,timestamp,Predicted delivery hour.
+as_of_date,date,SHAP job date.
+output_head,string,Output being explained.
+feature_name,string,Feature contributing to this prediction.
+feature_group,string,Human-readable feature group.
+feature_value,float/string/null,Input feature value for the delivery hour.
+shap_value,float,Signed SHAP value for this row and output head.
+abs_shap,float,Absolute SHAP value.
+rank_within_prediction,integer,Feature rank for one delivery_hour/output_head.
+predicted_spread,float,C1 predicted spread for context.
+p_negative,float,INC-side probability.
+p_neutral,float,No-trade probability.
+p_positive,float,DEC-side probability.
+signal,string,"INC, DEC or NO_TRADE."

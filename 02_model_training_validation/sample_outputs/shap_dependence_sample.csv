@@ -1,0 +1,4 @@
+as_of_date,window_type,output_head,feature_name,delivery_hour_utc,feature_value,shap_value,predicted_spread,p_negative,p_positive,signal,color_by
+2025-07-15,daily,positive_probability,net_load_ramp_1h_mw,2025-07-15T17:00:00Z,1800.0,0.042,7.5,0.14,0.44,NO_TRADE,signal
+2025-07-15,daily,positive_probability,net_load_ramp_1h_mw,2025-07-15T18:00:00Z,4200.0,0.251,18.4,0.08,0.71,DEC,signal
+2025-07-15,daily,positive_probability,net_load_ramp_1h_mw,2025-07-15T19:00:00Z,3900.0,0.198,14.1,0.1,0.63,DEC,signal

@@ -1,0 +1,14 @@
+field,type,description
+as_of_date,date,Date when the SHAP update job ran or the ranking is valid.
+window_type,string,"daily, weekly, monthly, rolling_7d, rolling_30d."
+window_start_utc,timestamp,Inclusive UTC start of aggregation window.
+window_end_utc,timestamp,Exclusive UTC end of aggregation window.
+output_head,string,"spread_regression, negative_probability, neutral_probability, positive_probability."
+feature_name,string,Feature name from frozen C1 feature schema.
+feature_group,string,Human-readable feature group.
+mean_abs_shap,float,Mean absolute SHAP value over the window.
+mean_shap,float,Signed mean SHAP value over the window.
+rank,integer,Rank within output_head and window by mean_abs_shap.
+n_rows,integer,Number of prediction rows included.
+model_version,string,C1 model version used for SHAP.
+feature_version,string,Feature schema/version.

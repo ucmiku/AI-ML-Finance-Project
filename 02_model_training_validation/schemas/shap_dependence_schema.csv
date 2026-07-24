@@ -1,0 +1,13 @@
+field,type,description
+as_of_date,date,SHAP job date.
+window_type,string,"daily, weekly, monthly."
+output_head,string,Output being explained.
+feature_name,string,Feature plotted on x-axis.
+delivery_hour_utc,timestamp,Prediction hour.
+feature_value,float/string/null,Feature value.
+shap_value,float,SHAP value for feature/output/head/hour.
+predicted_spread,float,Prediction context.
+p_negative,float,Prediction context.
+p_positive,float,Prediction context.
+signal,string,Prediction context.
+color_by,string,Optional field frontend can use for scatter color.

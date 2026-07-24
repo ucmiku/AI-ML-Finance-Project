@@ -1,0 +1,15 @@
+{
+  "package_name": "shap_update_pipeline_handoff_C1_v4",
+  "model": "C1_XGBoost_Prediction_Agent",
+  "purpose": "Design and interface package for daily/weekly/monthly SHAP update pipeline.",
+  "does_train_models": false,
+  "does_run_optuna": false,
+  "does_recompute_shap_now": false,
+  "requires_for_real_run": [
+    "approved C1 model artifact",
+    "same feature_schema.json and feature order used by C1",
+    "daily prediction feature table",
+    "shap package installed in runtime"
+  ],
+  "important_warning": "SHAP explains model behavior. It is not causal proof."
+}

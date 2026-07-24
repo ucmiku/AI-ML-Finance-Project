@@ -1,0 +1,34 @@
+{
+  "status": "COMPLETED",
+  "run_id": "B2_regression_formal_v3r1_f5730506",
+  "best_params": {
+    "n_estimators": 545,
+    "learning_rate": 0.028860688010347246,
+    "max_depth": 7,
+    "min_child_weight": 9.480430895570752,
+    "subsample": 0.8430813543824859,
+    "colsample_bytree": 0.6861270358776069,
+    "reg_alpha": 0.00036657135693258424,
+    "reg_lambda": 14.300357234868288,
+    "random_state": 20260722,
+    "n_jobs": 2,
+    "tree_method": "hist",
+    "early_stopping_rounds": 50,
+    "objective": "reg:squarederror",
+    "eval_metric": "mae"
+  },
+  "aggregate_metrics": {
+    "mae": 10.944148880384128,
+    "rmse": 36.397559380002875,
+    "median_absolute_error": 5.284255790809789,
+    "r2": 0.012975712785429824,
+    "pearson_correlation": 0.07420585632499899,
+    "spearman_correlation": 0.121941534381335,
+    "direction_accuracy": 0.6066678190753781,
+    "macro_f1_5_20_from_thresholds": 0.16689853714343794,
+    "prediction_seconds": 0.7419391333333323,
+    "train_rows": 11039.333333333334,
+    "validation_rows": 2920.0,
+    "best_iteration": 15.666666666666666
+  }
+}

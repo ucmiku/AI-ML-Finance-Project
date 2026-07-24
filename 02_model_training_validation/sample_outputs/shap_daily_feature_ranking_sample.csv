@@ -1,0 +1,4 @@
+as_of_date,window_type,window_start_utc,window_end_utc,output_head,feature_name,feature_group,mean_abs_shap,mean_shap,rank,n_rows,model_version,feature_version
+2025-07-15,daily,2025-07-15T00:00:00Z,2025-07-16T00:00:00Z,positive_probability,net_load_ramp_1h_mw,Load,0.184,0.031,1,24,C1_v3,feature_whitelist_v2
+2025-07-15,daily,2025-07-15T00:00:00Z,2025-07-16T00:00:00Z,positive_probability,cloud_cover_dfw_mean_pct,Raw Weather,0.108,0.024,2,24,C1_v3,feature_whitelist_v2
+2025-07-15,daily,2025-07-15T00:00:00Z,2025-07-16T00:00:00Z,spread_regression,spread_asof_roll_mad24,Historical Spread,0.222,-0.016,1,24,C1_v3,feature_whitelist_v2

@@ -1,0 +1,26 @@
+{
+  "spread_regression": {
+    "component": "B2A XGBoost Regression",
+    "target_output": "predicted_spread",
+    "frontend_label": "Spread magnitude drivers",
+    "notes": "Explains continuous spread output. Do not mix with classifier SHAP values."
+  },
+  "negative_probability": {
+    "component": "B2B XGBoost Classifier",
+    "target_output": "C1/C2 negative-side score or probability approximation",
+    "frontend_label": "INC-side drivers",
+    "notes": "Use for p_negative explanation. Exact implementation should define whether SHAP is on class logit/margin or probability approximation."
+  },
+  "neutral_probability": {
+    "component": "B2B XGBoost Classifier",
+    "target_output": "C3 neutral/no-trade score or probability approximation",
+    "frontend_label": "No-trade drivers",
+    "notes": "Use for p_neutral explanation."
+  },
+  "positive_probability": {
+    "component": "B2B XGBoost Classifier",
+    "target_output": "C4/C5 positive-side score or probability approximation",
+    "frontend_label": "DEC-side drivers",
+    "notes": "Use for p_positive explanation."
+  }
+}

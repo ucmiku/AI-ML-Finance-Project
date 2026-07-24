@@ -1,0 +1,9 @@
+{
+  "schemas": 3,
+  "sample_output_tables": 3,
+  "template_script_included": true,
+  "api_contract_included": true,
+  "frontend_notes_included": true,
+  "does_not_retrain": true,
+  "does_not_recompute_shap_now": true
+}
