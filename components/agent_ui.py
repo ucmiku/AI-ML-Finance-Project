@@ -4,7 +4,7 @@ import os
 import requests
 import json
 
-FASTAPI_AGENT_URL = "http://26.1.105.70:8000/v1/agent/ask"
+FASTAPI_AGENT_URL = "https://ai-ml-finance-project.onrender.com/v1/agent/ask"
 HISTORY_CACHE_FILE = "agent_memory.pkl"
 
 def load_memory():
@@ -83,7 +83,8 @@ def render_global_copilot():
                             else:
                                 ai_response = f"⚠️ Error {response.status_code}: {response.text}"
                             
-                            st.markdown(ai_response)
+                            clean_response = agent_response.replace("*", "")
+                            st.markdown(clean_response)
                             st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                             save_memory(st.session_state.chat_history)
                         except Exception as e:

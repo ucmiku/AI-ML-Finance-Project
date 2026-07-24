@@ -76,6 +76,20 @@ st.markdown("""
 #MainMenu {visibility: hidden;} header {visibility: hidden;} footer {visibility: hidden;}
 .block-container {padding: 0rem; max-width: 100%;}
 
+/* 覆盖 Streamlit Primary 按钮的默认荧光色 */
+button[data-testid="baseButton-primary"] {
+    background-color: #2C3E50 !important; /* 沉稳的深蓝灰 */
+    color: #E2E8F0 !important;            /* 柔和的灰白色 */
+    border: 1px solid #4A5568 !important; /* 细腻的边框 */
+    transition: all 0.3s ease;
+}
+
+button[data-testid="baseButton-primary"]:hover {
+    background-color: #34495E !important; 
+    border-color: #3498DB !important;     /* 悬浮时带出一点专业金融蓝 */
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.4) !important;
+}
+
 /* === Scene 0: 高级动态加载页面（增强版） === */
 .scene0-bg {
     position: fixed; 
@@ -260,7 +274,7 @@ elif st.session_state.scene == 1:
     
     st.markdown("""
     <div class='dialogue-box'>
-        <b>[System Alert] 14:00 PM - DAY AHEAD</b><br><br>
+        <b>[System Alert] 9:00 AM - DAY AHEAD</b><br><br>
         A once-in-a-century winter storm is bearing down on the North Hub.<br>
         You need to review the <b>multi-dimensional weather forecast</b> and place Day-Ahead Virtual Bids.
     </div>
@@ -308,19 +322,34 @@ elif st.session_state.scene == 2:
     """, unsafe_allow_html=True)
     
     # 绘制气象图表（去掉之前的点击交互，恢复纯展示模式）
+    # 绘制气象图表
     fig_weather = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    # 温度线：保持原样（原本的亮蓝色比较清晰）
     fig_weather.add_trace(go.Scatter(x=hours_str, y=temps_2m, mode='lines+markers', name='Temp 2m (°C)', line=dict(color='#00BFFF', width=3)), secondary_y=False)
-    fig_weather.add_trace(go.Scatter(x=hours_str, y=humidity_2m, mode='lines', name='Rel. Humidity (%)', line=dict(color='rgba(255,255,255,0.3)', width=1, dash='dot')), secondary_y=False)
-    fig_weather.add_trace(go.Bar(x=hours_str, y=precipitation, name='Precipitation (mm)', marker_color='rgba(255, 255, 255, 0.2)'), secondary_y=True)
+    
+    # 🌟 修改 1：加粗湿度线，提高不透明度至 0.8，改为更显眼的虚线
+    fig_weather.add_trace(go.Scatter(x=hours_str, y=humidity_2m, mode='lines', name='Rel. Humidity (%)', line=dict(color='rgba(255,255,255,0.8)', width=2, dash='dash')), secondary_y=False)
+    
+    # 🌟 修改 2：将降水柱状图改为带点蓝调的半透明色，提高辨识度
+    fig_weather.add_trace(go.Bar(x=hours_str, y=precipitation, name='Precipitation (mm)', marker_color='rgba(135, 206, 250, 0.4)'), secondary_y=True)
+    
+    # 风速线：保持原样
     fig_weather.add_trace(go.Scatter(x=hours_str, y=wind_speed_10m, mode='lines', name='Wind Spd (m/s)', line=dict(color='#FFA500', width=2)), secondary_y=True)
     
     fig_weather.update_layout(
-        template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', 
-        height=350, margin=dict(t=10, b=10, l=10, r=10), 
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        template="plotly_dark", 
+        # 🌟 修改 3：给图表增加一个深色半透明背景，隔绝背后的杂乱图片
+        plot_bgcolor='rgba(15, 20, 30, 0.75)', 
+        paper_bgcolor='rgba(15, 20, 30, 0.75)', 
+        height=350, 
+        margin=dict(t=10, b=10, l=10, r=10), 
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        # 🌟 修改 4：强制图表内部的所有坐标系和图例文字为纯白色，略微放大
+        font=dict(color="#FFFFFF", size=13)
     )
     st.plotly_chart(fig_weather, use_container_width=True)
-
+    
     # ==========================================
     # 🌟 全新设计的底部交互式时间轴按钮组
     # ==========================================

@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import os
 import json
 import requests
@@ -10,16 +11,77 @@ from components.agent_ui import render_global_copilot
 
 # Page Configuration
 st.set_page_config(page_title="Model Matrix", page_icon="🧪", layout="wide")
-st.title("🧪 Model Matrix & Audit Console")
-st.markdown("Interactive historical backtesting, performance metrics, and explainable AI insights.")
-st.divider()
+
 FASTAPI_BASE_URL = "http://26.1.105.70:8000"
 
+# ==========================================
+# 🌟 定制样式与登录检测 (全侧边栏对齐主页)
+# ==========================================
+st.markdown("""
+    <style>
+    [data-testid="stSidebarNav"] {
+        padding-top: 80px !important; 
+    }
+    .sidebar-logo-container {
+        position: fixed;
+        top: 25px;
+        left: 20px;
+        width: 250px;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# 持久化登录检测
+if "token" in st.query_params and st.query_params["token"] == "valid":
+    st.session_state['logged_in'] = True
+elif 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False
+
 with st.sidebar:
+    # 顶部固定 Logo
+    st.markdown("""
+        <div class="sidebar-logo-container">
+            <div style='background-color: #10B981; color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 12px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);'>
+                ⚡
+            </div>
+            <h2 style='margin: 0; color: #1E293B; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;'>GridWise</h2>
+        </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("### ⚙️ Copilot Access")
     st.markdown("Interact with the quantitative RAG engine anytime.")
     st.markdown("---")
     render_global_copilot()
+
+    st.markdown("---")
+    # 左下角用户状态
+    if st.session_state['logged_in']:
+        st.markdown("""
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px;">👤</div>
+                <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Sign Out", use_container_width=True):
+            st.session_state['logged_in'] = False
+            if "token" in st.query_params:
+                del st.query_params["token"]
+            st.rerun()
+    else:
+        st.markdown("<p style='color: #64748B; font-size: 14px; margin-bottom: 10px; font-weight: 500;'>Not logged in</p>", unsafe_allow_html=True)
+        if st.button("Sign In", use_container_width=True):
+            st.session_state['logged_in'] = True
+            st.query_params["token"] = "valid"
+            st.rerun()
+
+st.title("🧪 Model Matrix & Audit Console")
+st.markdown("Interactive historical backtesting, performance metrics, and explainable AI insights.")
+st.divider()
 
 # ==========================================
 # Page Layout
@@ -83,9 +145,9 @@ with tab_pred:
         fig_dual = go.Figure()
         
         prob_cols = {
-            'p_positive': ('Positive Spread Prob (RT > DA)', '#00E676', 'rgba(0, 230, 118, 0.3)'),
-            'p_neutral': ('Neutral Spread Prob (RT ≈ DA)', '#FFCA28', 'rgba(255, 202, 40, 0.3)'),
-            'p_negative': ('Negative Spread Prob (RT < DA)', '#FF5252', 'rgba(255, 82, 82, 0.3)')
+            'p_positive': ('Positive Spread Prob (RT > DA)', '#059669', 'rgba(5, 150, 105, 0.15)'),
+            'p_neutral': ('Neutral Spread Prob (RT ≈ DA)', '#F59E0B', 'rgba(245, 158, 11, 0.15)'),
+            'p_negative': ('Negative Spread Prob (RT < DA)', '#DC2626', 'rgba(220, 38, 38, 0.15)')
         }
         
         for col_name, (label, line_color, fill_color) in prob_cols.items():
@@ -115,11 +177,14 @@ with tab_pred:
                 x=hours_labels, y=actual_spread_values,
                 mode='lines+markers', name='Actual Spread ($/MWh)',
                 yaxis='y2',
-                line=dict(color='#29B6F6', width=2)
+                line=dict(color='#2563EB', width=2)
             ))
 
         fig_dual.update_layout(
-            template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            template="plotly_white",
+            plot_bgcolor='rgba(0,0,0,0)', 
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#1E293B'),
             xaxis_title="Delivery Hour (Local)", 
             yaxis=dict(title="Classification Probability", range=[0, 1]),
             yaxis2=dict(title="Actual Spread ($/MWh)", overlaying='y', side='right', showgrid=False),
@@ -186,16 +251,16 @@ with tab_pred:
         df_audit = pd.DataFrame(audit_data)
         
         def style_audit_log(row):
-            styles = [''] * len(row)
+            styles = ['border-bottom: 1px solid #333;'] * len(row)
             if row['Direction Correct'] == '✅ Yes':
-                styles[5] = 'color: #00E676; font-weight: bold;'
+                styles[5] += 'color: #4CAF50; font-weight: 500;'
             elif row['Direction Correct'] == '❌ No':
-                styles[5] = 'color: #FF5252; font-weight: bold;'
+                styles[5] += 'color: #D32F2F; font-weight: 500;'
                 
             if float(row['Net PnL'].replace('$', '')) > 0:
-                styles[6] = 'color: #00E676; font-weight: bold;'
+                styles[6] += 'color: #4CAF50; font-weight: 500;'
             elif float(row['Net PnL'].replace('$', '')) < 0:
-                styles[6] = 'color: #FF5252; font-weight: bold;'
+                styles[6] += 'color: #D32F2F; font-weight: 500;'
                 
             return styles
 
@@ -236,26 +301,26 @@ with tab_trade:
                 col_1st, col_2nd, col_3rd = st.columns(3)
                 with col_1st:
                     st.markdown(f"""
-                    <div style="background-color: rgba(255, 82, 82, 0.15); padding: 15px; border-radius: 10px; border-left: 5px solid #FF5252;">
-                        <h4 style="margin-top:0; color: white;">🥇 1st Place</h4>
-                        <h3 style="color: #FF5252;">{ranking[0]}</h3>
-                        <strong>Composite Score: {scores[ranking[0]]['composite']}</strong>
+                    <div style="background-color: rgba(220, 38, 38, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #DC2626;">
+                        <h4 style="margin-top:0; color: #1E293B;">🥇 1st Place</h4>
+                        <h3 style="color: #DC2626;">{ranking[0]}</h3>
+                        <strong style="color: #1E293B;">Composite Score: {scores[ranking[0]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
                 with col_2nd:
                     st.markdown(f"""
-                    <div style="background-color: rgba(0, 230, 118, 0.15); padding: 15px; border-radius: 10px; border-left: 5px solid #00E676;">
-                        <h4 style="margin-top:0; color: white;">🥈 2nd Place</h4>
-                        <h3 style="color: #00E676;">{ranking[1]}</h3>
-                        <strong>Composite Score: {scores[ranking[1]]['composite']}</strong>
+                    <div style="background-color: rgba(5, 150, 105, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #059669;">
+                        <h4 style="margin-top:0; color: #1E293B;">🥈 2nd Place</h4>
+                        <h3 style="color: #059669;">{ranking[1]}</h3>
+                        <strong style="color: #1E293B;">Composite Score: {scores[ranking[1]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
                 with col_3rd:
                     st.markdown(f"""
-                    <div style="background-color: rgba(41, 182, 246, 0.15); padding: 15px; border-radius: 10px; border-left: 5px solid #29B6F6;">
-                        <h4 style="margin-top:0; color: white;">🥉 3rd Place</h4>
-                        <h3 style="color: #29B6F6;">{ranking[2]}</h3>
-                        <strong>Composite Score: {scores[ranking[2]]['composite']}</strong>
+                    <div style="background-color: rgba(37, 99, 235, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #2563EB;">
+                        <h4 style="margin-top:0; color: #1E293B;">🥉 3rd Place</h4>
+                        <h3 style="color: #2563EB;">{ranking[2]}</h3>
+                        <strong style="color: #1E293B;">Composite Score: {scores[ranking[2]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
             
@@ -264,7 +329,7 @@ with tab_trade:
             radar_fig = go.Figure()
             categories = ["Return", "Risk", "Robustness", "Efficiency"]
             compare_models = [ranking[0], ranking[1], ranking[2]] 
-            colors = ['#FF5252', '#00E676', '#29B6F6'] 
+            colors = ['#DC2626', '#059669', '#2563EB']
             
             for idx, model_name in enumerate(compare_models):
                 if model_name in scores:
@@ -284,7 +349,7 @@ with tab_trade:
                     radialaxis=dict(visible=True, range=[0, 100], gridcolor="rgba(255,255,255,0.2)"),
                     bgcolor="rgba(0,0,0,0)"
                 ),
-                template="plotly_dark", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                template="plotly_white", font=dict(color='#1E293B'), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                 height=450, margin=dict(t=40, b=40, l=40, r=40),
                 legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1)
             )
@@ -311,27 +376,40 @@ with tab_trade:
         
         if equity_data:
             fig_eq = go.Figure()
-            highlight_strategies = ["B2B_Baseline_060", "ExtremeWeather_Only"]
             
             for strategy_name, curve_points in equity_data.items():
                 df_curve = pd.DataFrame(curve_points)
-                is_highlight = strategy_name in highlight_strategies
-                line_width = 4 if strategy_name == "ExtremeWeather_Only" else (2 if is_highlight else 1)
-                opacity = 1.0 if is_highlight else 0.3
-                dash_style = 'dash' if strategy_name == "B2B_Baseline_060" else 'solid'
+                
+                if strategy_name == "ExtremeWeather_Only":
+                    line_color = '#059669' 
+                    line_width = 4         
+                    opacity = 1.0
+                    dash_style = 'solid'
+                elif strategy_name == "B2B_Baseline_060":
+                    line_color = '#2563EB' 
+                    line_width = 2
+                    opacity = 1.0
+                    dash_style = 'dash'
+                else:
+                    line_color = '#94A3B8' 
+                    line_width = 1.5       
+                    opacity = 0.85         
+                    dash_style = 'solid'
                 
                 fig_eq.add_trace(go.Scatter(
                     x=df_curve['date'], y=df_curve['equity'],
                     mode='lines', name=strategy_name,
-                    line=dict(width=line_width, dash=dash_style), opacity=opacity
+                    line=dict(color=line_color, width=line_width, dash=dash_style), opacity=opacity
                 ))
                 
             fig_eq.update_layout(
-                template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                template="plotly_white",
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='#1E293B'),
                 hovermode="x unified", height=500, xaxis_title="Date", yaxis_title="Equity (USD)",
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
-            fig_eq.add_hline(y=100000, line_dash="dot", line_color="gray", annotation_text="Initial Capital ($100k)")
+            fig_eq.add_hline(y=100000, line_dash="dot", line_color="#DC2626", annotation_text="Initial Capital ($100k)") 
             st.plotly_chart(fig_eq, use_container_width=True)
 
 # ------------------------------------------
@@ -341,7 +419,6 @@ with tab_feature:
     st.markdown("#### 🧠 Explainable AI & SHAP Insights")
     st.markdown("Dynamic model attribution, feature ranking, local explanations, and dependence relationships via backend SHAP APIs.")
     
-    # Sub-tabs for SHAP exploration
     shap_tab1, shap_tab2, shap_tab3 = st.tabs([
         "📊 Global Feature Ranking", 
         "🔍 Local Hour Explanation", 
@@ -390,17 +467,17 @@ with tab_feature:
             df_sorted = df_ranking.sort_values(by='importance', ascending=True)
             fig_rank = go.Figure(go.Bar(
                 x=df_sorted['importance'], y=df_sorted['feature'], orientation='h',
-                marker=dict(color=df_sorted['importance'], colorscale='Greens')
+                marker=dict(color='#059669')
             ))
             fig_rank.update_layout(
-                template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                template="plotly_white", font=dict(color='#1E293B'), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
                 height=550, margin=dict(l=0, r=20, t=10, b=0),
                 xaxis_title="Mean Absolute SHAP Importance",
                 yaxis_title="Feature"
             )
             st.plotly_chart(fig_rank, use_container_width=True)
         else:
-            st.warning(f"⚠️ No SHAP ranking data found for window=`{window_choice}`, date=`{date_str_rank}`, head=`{output_head_val}`. (Please ensure backend endpoint `/explainability/ranking` is running).")
+            st.warning(f"⚠️ No SHAP ranking data found for window=`{window_choice}`, date=`{date_str_rank}`, head=`{output_head_val}`.")
 
     # 2. Local Hour Explanation
     with shap_tab2:
@@ -430,16 +507,15 @@ with tab_feature:
         df_local = fetch_shap_local(local_utc_hour, local_head_val, local_top_n)
 
         if df_local is not None and not df_local.empty:
-            # Sort by absolute shap value or impact
             df_local_sorted = df_local.sort_values(by='shap_value', ascending=True)
-            colors = ['#FF5252' if val < 0 else '#00E676' for val in df_local_sorted['shap_value']]
+            colors = ['#DC2626' if val < 0 else '#059669' for val in df_local_sorted['shap_value']]
             
             fig_local = go.Figure(go.Bar(
                 x=df_local_sorted['shap_value'], y=df_local_sorted['feature'], orientation='h',
                 marker=dict(color=colors)
             ))
             fig_local.update_layout(
-                template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                template="plotly_white", font=dict(color='#1E293B'), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
                 height=450, margin=dict(l=0, r=20, t=10, b=0),
                 xaxis_title="SHAP Value (Impact on Prediction)",
                 yaxis_title="Feature"
@@ -481,26 +557,28 @@ with tab_feature:
         df_dep = fetch_shap_dependence(dep_feature, dep_window, dep_date_str, dep_head_val, color_by_choice)
 
         if df_dep is not None and not df_dep.empty:
-            fig_dep = px_scatter = go.Figure(go.Scatter(
-                x=df_dep.get('feature_value'),
-                y=df_dep.get('shap_value'),
-                mode='markers',
-                marker=dict(
-                    size=8,
-                    color=df_dep.get('color_value', df_dep.get(color_by_choice, 0)),
-                    colorscale='Viridis',
-                    showscale=True,
-                    colorbar=dict(title=color_by_choice)
-                ),
-                text=df_dep.get('delivery_time', None)
-            ))
-            fig_dep.update_layout(
-                template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                height=500, margin=dict(l=0, r=20, t=10, b=0),
-                xaxis_title=f"Feature Value: {dep_feature}",
-                yaxis_title="SHAP Value"
+            fig_dep = px.scatter(
+                df_dep,
+                x='feature_value',
+                y='shap_value',
+                color=color_by_choice,
+                hover_data=['delivery_time'] if 'delivery_time' in df_dep.columns else None,
+                color_continuous_scale='Viridis',
+                labels={
+                    'feature_value': f"Feature: {dep_feature}", 
+                    'shap_value': "SHAP Value"
+                }
             )
+            
+            fig_dep.update_traces(marker=dict(size=8, opacity=0.8, line=dict(width=0.5, color='white'))) 
+            fig_dep.update_layout(
+                template="plotly_white",
+                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='#1E293B'),
+                height=500, margin=dict(l=0, r=20, t=10, b=0)
+            )
+            
             st.plotly_chart(fig_dep, use_container_width=True)
-            st.markdown("> **Caution Note:** Do not infer direct causality from dependence plots; they illustrate model sensitivity, nonlinear behavior, and regime dependence[cite: 9].")
+            st.markdown("> **Caution Note:** Do not infer direct causality from dependence plots; they illustrate model sensitivity, nonlinear behavior, and regime dependence.")
         else:
             st.warning(f"⚠️ No dependence data found for feature `{dep_feature}` on `{dep_date_str}`. Check if the feature name is valid.")

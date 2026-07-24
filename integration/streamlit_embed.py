@@ -22,7 +22,7 @@ def render_ercot_map_workbench(
     """
 
     workbench_url = url or os.getenv("ERCOT_MAP_WORKBENCH_URL", "http://127.0.0.1:5178")
-    components.iframe(workbench_url, height=height, scrolling=False)
+    components.iframe(workbench_url, width="100%", height=height, scrolling=False)
 
 
 if __name__ == "__main__":

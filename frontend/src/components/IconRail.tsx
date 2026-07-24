@@ -1,10 +1,11 @@
-import { CloudSun, Gauge, Info, Layers, LineChart, Radiation, Wind } from 'lucide-react'
+import { CloudSun, Gauge, Info, LineChart, Radiation, Wind } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-export type RailTab = 'layers' | 'weather' | 'load' | 'renewables' | 'risk' | 'model' | 'info'
+// 1. 从 RailTab 类型中移除 'layers'
+export type RailTab = 'weather' | 'load' | 'renewables' | 'risk' | 'model' | 'info'
 
+// 2. 从图标数组中直接删掉第一项（id: 'layers'）
 const items: Array<{ id: RailTab; label: string; icon: LucideIcon }> = [
-  { id: 'layers', label: 'Layers', icon: Layers },
   { id: 'weather', label: 'Weather', icon: CloudSun },
   { id: 'load', label: 'Load', icon: Gauge },
   { id: 'renewables', label: 'Renewables', icon: Wind },

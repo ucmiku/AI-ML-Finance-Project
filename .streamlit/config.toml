@@ -1,7 +1,7 @@
 [theme]
-base="dark"
-primaryColor="#00E676"  # 荧光绿，用来突出重点按钮或盈利
-backgroundColor="#0E1117" # 深邃黑背景
-secondaryBackgroundColor="#262730" # 卡片背景色
-textColor="#FAFAFA"
+base="light"
+primaryColor="#059669"   # 使用深翡翠绿作为主按钮色
+backgroundColor="#F5F7FA" # 柔和的浅灰背景
+secondaryBackgroundColor="#FFFFFF" # 卡片和侧边栏的白底
+textColor="#1E293B"       # 深炭黑文字
 font="sans serif"

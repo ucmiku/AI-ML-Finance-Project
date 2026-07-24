@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { IconRail, type RailTab } from './components/IconRail'
 import { MapCanvas } from './map/MapCanvas'
-import { DecisionPanel } from './panels/DecisionPanel'
-import { LayerPanel } from './panels/LayerPanel'
 import { ContextPanel } from './panels/ContextPanel'
-import { BottomAnalysisPanel } from './panels/BottomAnalysisPanel'
 import { defaultLayers, demoSnapshot } from './mock/demoSnapshot'
 import { loadWorkbenchData } from './services/api'
 import type { DataMode, DashboardSnapshot, MapLayerMeta, WeatherLocation } from './types/dashboard'
 
 export function App() {
-  const [activeRail, setActiveRail] = useState<RailTab>('layers')
+  const [activeRail, setActiveRail] = useState<RailTab>('weather')
   const [mode, setMode] = useState<DataMode>('auto')
   const [snapshot, setSnapshot] = useState<DashboardSnapshot>(demoSnapshot)
   const [layers, setLayers] = useState<MapLayerMeta[]>(defaultLayers)
@@ -37,23 +34,25 @@ export function App() {
     return () => { cancelled = true }
   }, [mode])
 
-  const timeseries = useMemo(() => snapshot.timeseries_24h, [snapshot])
-
   const toggleLayer = (id: string, visible: boolean) => {
     setLayers((items) => items.map((item) => item.id === id && item.enabled ? { ...item, visible } : item))
-  }
-  const setOpacity = (id: string, opacity: number) => {
-    setLayers((items) => items.map((item) => item.id === id ? { ...item, opacity } : item))
   }
 
   return (
     <div className="app-shell">
+      {/* 第 1 列：左侧图标导航栏 (48px) */}
       <IconRail active={activeRail} onChange={setActiveRail} />
-      {activeRail === 'layers' ? (
-        <LayerPanel layers={layers} onToggle={toggleLayer} onOpacity={setOpacity} />
-      ) : (
-        <ContextPanel active={activeRail} snapshot={snapshot} selected={selected} weatherVariable={weatherVariable} onWeatherVariable={setWeatherVariable} />
-      )}
+      
+      {/* 第 2 列：必须加回这个左侧图层数据面板 (230px)，否则地图会挤到这里来 */}
+      <ContextPanel 
+        active={activeRail} 
+        snapshot={snapshot} 
+        selected={selected} 
+        weatherVariable={weatherVariable} 
+        onWeatherVariable={setWeatherVariable} 
+      />
+
+      {/* 第 3 列：地图接管剩余的全部空间 (1fr) */}
       <MapCanvas
         snapshot={snapshot}
         layers={layers}
@@ -66,8 +65,8 @@ export function App() {
         onLayerToggle={toggleLayer}
         onReset={() => undefined}
       />
-      <DecisionPanel snapshot={snapshot} selected={selected} />
-      <BottomAnalysisPanel timeseries={timeseries} deliveryHour={deliveryHour} />
+
+      {/* 底部数据模式切换 */}
       <div className="mode-switcher">
         <label>Data</label>
         <select value={mode} onChange={(e) => setMode(e.target.value as DataMode)}>
@@ -76,19 +75,6 @@ export function App() {
           <option value="demo">Demo Snapshot</option>
         </select>
         <span className={apiHealthy ? 'ok' : 'warn'}>{source === 'api' ? 'FastAPI' : 'Mock JSON'}</span>
-      </div>
-      <div className="hidden-controls">
-        <select value={weatherVariable} onChange={(e) => setWeatherVariable(e.target.value)}>
-          <option>Temperature</option>
-          <option>Extreme Risk</option>
-        </select>
-        <select value={marketVariable} onChange={(e) => setMarketVariable(e.target.value)}>
-          <option>Predicted RT−DA Spread</option>
-          <option>System Load</option>
-          <option>Net Load</option>
-        </select>
-        <input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
-        <input type="range" min="0" max="23" value={deliveryHour} onChange={(e) => setDeliveryHour(Number(e.target.value))} />
       </div>
     </div>
   )

@@ -77,7 +77,8 @@ export function MapCanvas({
     if (!containerRef.current || mapRef.current) return
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: cartoDarkMatterStyle,
+      // 🌟 替换这里：使用自带浅米黄色的亮色底图 (CARTO Voyager)
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
       center: TEXAS_CENTER,
       zoom: 5.05,
       pitch: 0,
@@ -107,7 +108,8 @@ export function MapCanvas({
         source: 'ercot-weather-points',
         paint: {
           'circle-radius': ['case', ['==', ['get', 'selected'], true], 12, 9],
-          'circle-color': '#090d12',
+          // 🌟 原本是 '#090d12'，现在改为白色或浅色
+          'circle-color': '#ffffff', 
           'circle-stroke-color': ['get', 'color'],
           'circle-stroke-width': ['case', ['==', ['get', 'selected'], true], 3, 2],
           'circle-opacity': 0.98,
@@ -135,8 +137,10 @@ export function MapCanvas({
           'text-allow-overlap': true,
         },
         paint: {
-          'text-color': '#f3f6fa',
-          'text-halo-color': '#090d12',
+          // 🌟 文字本身改为深灰色
+          'text-color': '#333333',
+          // 🌟 文字描边改为白色，以便在复杂的地图背景上凸显
+          'text-halo-color': '#ffffff',
           'text-halo-width': 1.5,
           'text-opacity': labelsVisible ? 1 : 0,
         },
@@ -159,7 +163,8 @@ export function MapCanvas({
         layout: { 'text-field': '\u25C6', 'text-size': 22, 'text-allow-overlap': true },
         paint: {
           'text-color': '#2f80ed',
-          'text-halo-color': '#090d12',
+          // 🌟 描边改为白色
+          'text-halo-color': '#ffffff',
           'text-halo-width': 2,
           'text-opacity': hubVisible ? 1 : 0,
         },
