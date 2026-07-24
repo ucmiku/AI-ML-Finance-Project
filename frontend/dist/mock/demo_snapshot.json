@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "hub": "HB_NORTH",
+    "mode": "demo_snapshot",
+    "delivery_time": "2025-07-15 12:00:00-05:00",
+    "delivery_time_utc": "2025-07-15 17:00:00+00:00",
+    "decision_time": "2025-07-14 09:55:00-05:00",
+    "forecast_issue_time": "2025-07-14 12:00:00+00:00",
+    "data_status": "demo_only",
+    "model_version": "demo-model-not-production",
+    "source": "frontend/public/mock/demo_snapshot.json"
+  },
+  "locations": [
+    {
+      "location": "DFW",
+      "latitude": 32.9,
+      "longitude": -97.04,
+      "risk_level": "high",
+      "coordinate_status": "demo_only",
+      "values": {
+        "temperature_dfw_mean_c": 38.2,
+        "humidity_dfw_mean_pct": 44,
+        "wind_speed_dfw_mean_ms": 5.6,
+        "wind_gust_dfw_mean_ms": 9.8,
+        "radiation_dfw_mean_wm2": 720,
+        "precipitation_dfw_mean_mm": 0.1
+      }
+    },
+    {
+      "location": "Wichita",
+      "latitude": 37.65,
+      "longitude": -97.43,
+      "risk_level": "medium",
+      "coordinate_status": "demo_only",
+      "values": {
+        "temperature_dfw_mean_c": 35.1,
+        "humidity_dfw_mean_pct": 50,
+        "wind_speed_dfw_mean_ms": 7.2,
+        "wind_gust_dfw_mean_ms": 12.3,
+        "radiation_dfw_mean_wm2": 680,
+        "precipitation_dfw_mean_mm": 0.4
+      }
+    },
+    {
+      "location": "Austin",
+      "latitude": 30.27,
+      "longitude": -97.74,
+      "risk_level": "low",
+      "coordinate_status": "demo_only",
+      "values": {
+        "temperature_dfw_mean_c": 34.4,
+        "humidity_dfw_mean_pct": 52,
+        "wind_speed_dfw_mean_ms": 4.8,
+        "wind_gust_dfw_mean_ms": 8.2,
+        "radiation_dfw_mean_wm2": 705,
+        "precipitation_dfw_mean_mm": 0
+      }
+    },
+    {
+      "location": "Houston",
+      "latitude": 29.76,
+      "longitude": -95.37,
+      "risk_level": "medium",
+      "coordinate_status": "demo_only",
+      "values": {
+        "temperature_dfw_mean_c": 36.8,
+        "humidity_dfw_mean_pct": 62,
+        "wind_speed_dfw_mean_ms": 6.1,
+        "wind_gust_dfw_mean_ms": 10.4,
+        "radiation_dfw_mean_wm2": 690,
+        "precipitation_dfw_mean_mm": 0.3
+      }
+    }
+  ],
+  "weather": {},
+  "load": {
+    "load_system_total_mw": 70600,
+    "net_load_st_forecast_system_mw": 48200,
+    "load_ramp_1h_mw": 800,
+    "load_ramp_3h_mw": 2600
+  },
+  "wind": {
+    "wind_stwpf_system_wide_mw": 12400,
+    "wind_wgrpp_system_wide_mw": 14100,
+    "wind_gap_system_mw": 1700,
+    "wind_gap_system_pct": 12.1
+  },
+  "solar": {
+    "solar_stppf_system_mw": 10600,
+    "solar_pvgrpp_system_mw": 11300,
+    "solar_gap_system_mw": 700,
+    "solar_gap_system_pct": 6.2
+  },
+  "renewable": {
+    "renewable_st_forecast_system_mw": 23000,
+    "renewable_potential_system_mw": 25400,
+    "renewable_st_share_of_load": 0.326
+  },
+  "gas": {
+    "gas_price": 2.72,
+    "gas_price_z30": 0.45,
+    "gas_is_forward_filled": false
+  },
+  "extreme_weather": {
+    "extreme_heat_hour_flag": 1,
+    "extreme_heat_city_count": 2,
+    "fixed_extreme_weather_flag": 1,
+    "fixed_extreme_weather_coverage_24h": 0.25
+  },
+  "prediction": {
+    "predicted_spread": 11.8,
+    "signal": "INC",
+    "confidence": 82,
+    "risk_level": "high",
+    "target_available": true,
+    "actual_spread": 9.4
+  },
+  "drivers": [
+    { "feature": "net_load_ramp_3h_mw", "label": "3h Net Load Ramp", "impact": 2.4, "status": "illustrative" },
+    { "feature": "extreme_heat_hour_flag", "label": "Extreme Heat Flag", "impact": 1.8, "status": "illustrative" },
+    { "feature": "wind_gap_system_mw", "label": "Wind Forecast Gap", "impact": 1.1, "status": "illustrative" },
+    { "feature": "gas_price_z30", "label": "Gas Price Z-Score", "impact": -0.7, "status": "illustrative" }
+  ],
+  "timeseries_24h": [
+    { "delivery_time": "2025-07-15 00:00:00-05:00", "temperature_dfw_mean_c": 28, "temperature_wichita_c": 26, "load_system_total_mw": 51000, "net_load_st_forecast_system_mw": 39000, "wind_stwpf_system_wide_mw": 12000, "wind_wgrpp_system_wide_mw": 13000, "solar_stppf_system_mw": 0, "solar_pvgrpp_system_mw": 0, "gas_price": 2.72, "fixed_extreme_weather_flag": 0, "predicted_spread": 2.8 },
+    { "delivery_time": "2025-07-15 06:00:00-05:00", "temperature_dfw_mean_c": 27, "temperature_wichita_c": 25, "load_system_total_mw": 55000, "net_load_st_forecast_system_mw": 40000, "wind_stwpf_system_wide_mw": 11600, "wind_wgrpp_system_wide_mw": 12800, "solar_stppf_system_mw": 3100, "solar_pvgrpp_system_mw": 3500, "gas_price": 2.72, "fixed_extreme_weather_flag": 0, "predicted_spread": 4.1 },
+    { "delivery_time": "2025-07-15 12:00:00-05:00", "temperature_dfw_mean_c": 38.2, "temperature_wichita_c": 35.1, "load_system_total_mw": 70600, "net_load_st_forecast_system_mw": 48200, "wind_stwpf_system_wide_mw": 12400, "wind_wgrpp_system_wide_mw": 14100, "solar_stppf_system_mw": 10600, "solar_pvgrpp_system_mw": 11300, "gas_price": 2.72, "fixed_extreme_weather_flag": 1, "predicted_spread": 11.8 },
+    { "delivery_time": "2025-07-15 18:00:00-05:00", "temperature_dfw_mean_c": 36, "temperature_wichita_c": 33, "load_system_total_mw": 73500, "net_load_st_forecast_system_mw": 57000, "wind_stwpf_system_wide_mw": 10900, "wind_wgrpp_system_wide_mw": 12700, "solar_stppf_system_mw": 4800, "solar_pvgrpp_system_mw": 5200, "gas_price": 2.72, "fixed_extreme_weather_flag": 1, "predicted_spread": 7.5 },
+    { "delivery_time": "2025-07-15 23:00:00-05:00", "temperature_dfw_mean_c": 30, "temperature_wichita_c": 28, "load_system_total_mw": 57000, "net_load_st_forecast_system_mw": 43000, "wind_stwpf_system_wide_mw": 13300, "wind_wgrpp_system_wide_mw": 14500, "solar_stppf_system_mw": 0, "solar_pvgrpp_system_mw": 0, "gas_price": 2.72, "fixed_extreme_weather_flag": 0, "predicted_spread": 1.6 }
+  ],
+  "warnings": ["Demo point coordinates are illustrative and are not verified station metadata."]
+}
