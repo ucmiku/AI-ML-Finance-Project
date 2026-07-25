@@ -11,7 +11,7 @@ def get_base64_image(image_path):
     return ""
 
 def inject_custom_css():
-    """全局注入 Mercury 风格高科技浅色 CSS 主题（纯粹而优雅的板块整体加载浮入）"""
+    """全局注入 Mercury 风格高科技浅色 CSS 主题"""
     st.markdown("""
         <style>
         /* ==========================================
@@ -36,14 +36,15 @@ def inject_custom_css():
         }
 
         /* ==========================================
-           2. 侧边栏及顶部悬浮毛玻璃遮罩 (Frosted Glass Mask)
+           2. 彻底隐藏 Streamlit 默认导航栏 & 侧边栏置顶
            ========================================== */
+        /* 🌟 核心修复：隐藏自动生成的灰色无图标导航栏 */
         [data-testid="stSidebarNav"] {
-            padding-top: 65px !important; 
+            display: none !important; 
         }
 
         [data-testid="stSidebarContent"] {
-            padding-top: 0px !important;
+            padding-top: 20px !important;
         }
 
         [data-testid="stSidebar"] {
@@ -174,7 +175,7 @@ def inject_custom_css():
         }
 
         /* ==========================================
-           5. 🌟 板块专属页面加载浮入动效（2.2s 慢速、交错方向、单次锁定）
+           5. 板块专属页面加载浮入动效
            ========================================== */
         @keyframes terminalLoadBottom {
             0% { opacity: 0; transform: translateY(120px); }
@@ -191,18 +192,15 @@ def inject_custom_css():
             100% { opacity: 1; transform: translateX(0); }
         }
 
-        /* 默认主页面所有板块：从下方慢速浮入 */
         [data-testid="stMain"] [data-testid="stVerticalBlock"] > div {
             opacity: 0;
             animation: terminalLoadBottom 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* 交错：第 2 个板块从左侧滑入 */
         [data-testid="stMain"] [data-testid="stVerticalBlock"] > div:nth-child(3n + 2) {
             animation-name: terminalLoadLeft;
         }
 
-        /* 交错：第 3 个板块从右侧滑入 */
         [data-testid="stMain"] [data-testid="stVerticalBlock"] > div:nth-child(3n + 3) {
             animation-name: terminalLoadRight;
         }
@@ -210,7 +208,7 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def render_sidebar_logo():
-    """渲染侧边栏顶部自适应毛玻璃 Logo 遮罩"""
+    """渲染侧边栏顶部自适应毛玻璃 Logo 遮罩（已移除多余的 st.page_link）"""
     icon_base64 = get_base64_image("pages/icon.png")
     
     if icon_base64:
@@ -223,4 +221,5 @@ def render_sidebar_logo():
             {img_html}
             <span class="sidebar-logo-text">GridWise</span>
         </div>
+        <div style="height: 45px;"></div>
     """, unsafe_allow_html=True)

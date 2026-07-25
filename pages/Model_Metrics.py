@@ -12,13 +12,13 @@ import os
 from components.theme import inject_custom_css, render_sidebar_logo
 
 # Page Configuration
-st.set_page_config(page_title="Model Matrix", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="Model Matrix", page_icon=":material/science:", layout="wide")
 inject_custom_css()
 
 FASTAPI_BASE_URL = "http://26.1.105.70:8000"
 
 # ==========================================
-# 🌟 定制样式与登录检测 (全侧边栏对齐主页)
+# :material/star: 定制样式与登录检测 (全侧边栏对齐主页)
 # ==========================================
 
 # 持久化登录检测
@@ -30,17 +30,23 @@ elif 'logged_in' not in st.session_state:
 with st.sidebar:
     render_sidebar_logo()
     
-    st.markdown("### ⚙️ Copilot Access")
+    st.page_link("Home.py", label="Terminal Home", icon=":material/dashboard:")
+    st.page_link("pages/Live_Forecast.py", label="Live Forecast", icon=":material/show_chart:")
+    st.page_link("pages/Model_Metrics.py", label="Model Metrics", icon=":material/analytics:")
+    st.markdown("---")
+    st.markdown("Copilot Access")
     st.markdown("Interact with the quantitative RAG engine anytime.")
     st.markdown("---")
     render_global_copilot()
-
     st.markdown("---")
+    
     # 左下角用户状态
     if st.session_state['logged_in']:
         st.markdown("""
             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px;">👤</div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
+                </div>
                 <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
             </div>
         """, unsafe_allow_html=True)
@@ -56,7 +62,7 @@ with st.sidebar:
             st.query_params["token"] = "valid"
             st.rerun()
 
-st.title("🧪 Model Matrix & Audit Console")
+st.title(":material/science: Model Matrix & Audit Console")
 st.markdown("Interactive historical backtesting, performance metrics, and explainable AI insights.")
 st.divider()
 
@@ -64,9 +70,9 @@ st.divider()
 # Page Layout
 # ==========================================
 tab_pred, tab_trade, tab_feature = st.tabs([
-    "🎯 Prediction Model Performance", 
-    "📈 Trading Model Performance", 
-    "🧠 Explainable AI"
+    ":material/my_location: Prediction Model Performance", 
+    ":material/show_chart: Trading Model Performance", 
+    ":material/psychology: Explainable AI"
 ])
 
 json_path = "bk_testing/backtest_result_c1.json"
@@ -79,10 +85,10 @@ if os.path.exists(json_path):
 # Tab 1: Prediction Model Performance
 # ------------------------------------------
 with tab_pred:
-    st.markdown("### 🎯 Classification Probability & Actual Spread Tracker")
+    st.markdown("### :material/my_location: Classification Probability & Actual Spread Tracker")
     st.markdown("Tracking C1 dual-output classification probabilities alongside actual spread.")
     
-    st.info("💡 **Chart Guide:** The colored areas represent the model's predicted probability (Left Axis). **The larger the area, the stronger the model's conviction:** 🔴 **Red** (RT < DA), 🟡 **Yellow** (RT ≈ DA), 🟢 **Green** (RT > DA). The solid blue line tracks the actual market spread (Right Axis).")
+    st.info(":material/lightbulb: **Chart Guide:** The colored areas represent the model's predicted probability (Left Axis). **The larger the area, the stronger the model's conviction:** :material/circle: **Red** (RT < DA), :material/circle: **Yellow** (RT ≈ DA), :material/circle: **Green** (RT > DA). The solid blue line tracks the actual market spread (Right Axis).")
 
     col_d1, col_d2 = st.columns([2, 6])
     with col_d1:
@@ -172,7 +178,7 @@ with tab_pred:
         st.plotly_chart(fig_dual, use_container_width=True)
 
         # Hourly Prediction Audit Log
-        st.markdown("#### 🕵️ Hourly Prediction Audit Log")
+        st.markdown("#### :material/policy: Hourly Prediction Audit Log")
         st.markdown("Evaluating true prediction accuracy and hypothetical Net PnL based on actual historical spread.")
         
         audit_data = []
@@ -197,16 +203,16 @@ with tab_pred:
                 else: recommended_action = "NO_TRADE"
                 
             if recommended_action == "DEC" and actual_direction == "Positive":
-                is_correct = "✅ Yes"
+                is_correct = ":material/check: Yes"
                 executed = "Yes (DEC)"
             elif recommended_action == "INC" and actual_direction == "Negative":
-                is_correct = "✅ Yes"
+                is_correct = ":material/check: Yes"
                 executed = "Yes (INC)"
             elif recommended_action == "NO_TRADE":
-                is_correct = "⚪ N/A"
+                is_correct = ":material/remove: N/A"
                 executed = "No"
             else:
-                is_correct = "❌ No"
+                is_correct = ":material/close: No"
                 executed = f"Yes ({recommended_action})"
                 
             if executed == "No":
@@ -229,9 +235,9 @@ with tab_pred:
         
         def style_audit_log(row):
             styles = ['border-bottom: 1px solid #333;'] * len(row)
-            if row['Direction Correct'] == '✅ Yes':
+            if row['Direction Correct'] == ':material/check: Yes':
                 styles[5] += 'color: #4CAF50; font-weight: 500;'
-            elif row['Direction Correct'] == '❌ No':
+            elif row['Direction Correct'] == ':material/close: No':
                 styles[5] += 'color: #D32F2F; font-weight: 500;'
                 
             if float(row['Net PnL'].replace('$', '')) > 0:
@@ -244,16 +250,16 @@ with tab_pred:
         st.dataframe(df_audit.style.apply(style_audit_log, axis=1), use_container_width=True, hide_index=True)
 
     else:
-        st.warning(f"⚠️ No prediction audit data available from FastAPI for `{date_str}`.")
+        st.warning(f":material/warning: No prediction audit data available from FastAPI for `{date_str}`.")
 
 # ------------------------------------------
 # Tab 2: Trading Model Performance
 # ------------------------------------------
 with tab_trade:
     if not c1_data:
-        st.warning(f"⚠️ Backtest file not found: `{json_path}`.")
+        st.warning(f":material/warning: Backtest file not found: `{json_path}`.")
     else:
-        st.markdown("### 📈 Trading Strategy Evaluation")
+        st.markdown("### :material/show_chart: Trading Strategy Evaluation")
         meta = c1_data.get("meta", {})
         assumptions = meta.get("assumptions", {})
         
@@ -270,7 +276,7 @@ with tab_trade:
             with open(scoring_json_path, "r", encoding="utf-8") as fs:
                 scoring_data = json.load(fs)
                 
-            st.markdown("#### 🏆 Strategy Leaderboard & Capability Radar")
+            st.markdown("#### :material/emoji_events: Strategy Leaderboard & Capability Radar")
             ranking = scoring_data.get("ranking", [])
             scores = scoring_data.get("scores", {})
             
@@ -279,24 +285,33 @@ with tab_trade:
                 with col_1st:
                     st.markdown(f"""
                     <div style="background-color: rgba(220, 38, 38, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #DC2626;">
-                        <h4 style="margin-top:0; color: #1E293B;">🥇 1st Place</h4>
-                        <h3 style="color: #DC2626;">{ranking[0]}</h3>
+                        <h4 style="margin-top:0; color: #1E293B; display: flex; align-items: center;">
+                            <img src="https://api.iconify.design/icon-park-outline/trophy.svg?color=%23DC2626" width="22" style="margin-right: 6px;"> 
+                            1st Place
+                        </h4>
+                        <h3 style="color: #DC2626; margin-top: 5px;">{ranking[0]}</h3>
                         <strong style="color: #1E293B;">Composite Score: {scores[ranking[0]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
                 with col_2nd:
                     st.markdown(f"""
                     <div style="background-color: rgba(5, 150, 105, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #059669;">
-                        <h4 style="margin-top:0; color: #1E293B;">🥈 2nd Place</h4>
-                        <h3 style="color: #059669;">{ranking[1]}</h3>
+                        <h4 style="margin-top:0; color: #1E293B; display: flex; align-items: center;">
+                            <img src="https://api.iconify.design/icon-park-outline/medal-one.svg?color=%23059669" width="22" style="margin-right: 6px;"> 
+                            2nd Place
+                        </h4>
+                        <h3 style="color: #059669; margin-top: 5px;">{ranking[1]}</h3>
                         <strong style="color: #1E293B;">Composite Score: {scores[ranking[1]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
                 with col_3rd:
                     st.markdown(f"""
                     <div style="background-color: rgba(37, 99, 235, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #2563EB;">
-                        <h4 style="margin-top:0; color: #1E293B;">🥉 3rd Place</h4>
-                        <h3 style="color: #2563EB;">{ranking[2]}</h3>
+                        <h4 style="margin-top:0; color: #1E293B; display: flex; align-items: center;">
+                            <img src="https://api.iconify.design/icon-park-outline/badge.svg?color=%232563EB" width="22" style="margin-right: 6px;"> 
+                            3rd Place
+                        </h4>
+                        <h3 style="color: #2563EB; margin-top: 5px;">{ranking[2]}</h3>
                         <strong style="color: #1E293B;">Composite Score: {scores[ranking[2]]['composite']}</strong>
                     </div>
                     """, unsafe_allow_html=True)
@@ -333,7 +348,7 @@ with tab_trade:
             st.plotly_chart(radar_fig, use_container_width=True)
             st.divider()
             
-            st.markdown("#### 📊 Strategy Comparison Matrix")
+            st.markdown("#### :material/bar_chart: Strategy Comparison Matrix")
             df_comp = pd.DataFrame(c1_data.get("strategy_comparison", []))
             if not df_comp.empty:
                 df_comp = df_comp.sort_values(by="sharpe_ratio", ascending=False)
@@ -348,7 +363,7 @@ with tab_trade:
                 
             st.divider()
 
-        st.markdown("#### 📈 Multi-Strategy Equity Curves")
+        st.markdown("#### :material/show_chart: Multi-Strategy Equity Curves")
         equity_data = c1_data.get("equity_curves", {})
         
         if equity_data:
@@ -393,13 +408,13 @@ with tab_trade:
 # Tab 3: Feature Importance Analysis (SHAP Explainability API)
 # ------------------------------------------
 with tab_feature:
-    st.markdown("#### 🧠 Explainable AI & SHAP Insights")
+    st.markdown("#### :material/psychology: Explainable AI & SHAP Insights")
     st.markdown("Dynamic model attribution, feature ranking, local explanations, and dependence relationships via backend SHAP APIs.")
     
     shap_tab1, shap_tab2, shap_tab3 = st.tabs([
-        "📊 Global Feature Ranking", 
-        "🔍 Local Hour Explanation", 
-        "📈 Feature Dependence Scatter"
+        ":material/bar_chart: Global Feature Ranking", 
+        ":material/search: Local Hour Explanation", 
+        ":material/scatter_plot: Feature Dependence Scatter"
     ])
 
     output_head_options = {
@@ -411,7 +426,7 @@ with tab_feature:
 
     # 1. Global Feature Ranking
     with shap_tab1:
-        st.markdown("##### 📊 Global Feature Importance Ranking")
+        st.markdown("##### :material/bar_chart: Global Feature Importance Ranking")
         col_r1, col_r2, col_r3, col_r4 = st.columns(4)
         
         with col_r1:
@@ -454,11 +469,11 @@ with tab_feature:
             )
             st.plotly_chart(fig_rank, use_container_width=True)
         else:
-            st.warning(f"⚠️ No SHAP ranking data found for window=`{window_choice}`, date=`{date_str_rank}`, head=`{output_head_val}`.")
+            st.warning(f":material/warning: No SHAP ranking data found for window=`{window_choice}`, date=`{date_str_rank}`, head=`{output_head_val}`.")
 
     # 2. Local Hour Explanation
     with shap_tab2:
-        st.markdown("##### 🔍 Local Prediction Explanation (Single Delivery Hour)")
+        st.markdown("##### :material/search: Local Prediction Explanation (Single Delivery Hour)")
         col_l1, col_l2, col_l3 = st.columns(3)
         with col_l1:
             local_utc_hour = st.text_input("Delivery Hour UTC", value="2026-06-26 12:00:00+00:00", key="shap_local_utc")
@@ -500,11 +515,11 @@ with tab_feature:
             st.plotly_chart(fig_local, use_container_width=True)
             st.markdown("> **Interpretation Note:** Positive SHAP values (green) push the prediction upward for this hour, while negative SHAP values (red) push it downward.")
         else:
-            st.warning(f"⚠️ No local SHAP explanation found for UTC hour `{local_utc_hour}`. Please check the UTC timestamp format.")
+            st.warning(f":material/warning: No local SHAP explanation found for UTC hour `{local_utc_hour}`. Please check the UTC timestamp format.")
 
     # 3. Feature Dependence Scatter
     with shap_tab3:
-        st.markdown("##### 📈 Feature Dependence & Interaction Scatter Plot")
+        st.markdown("##### :material/scatter_plot: Feature Dependence & Interaction Scatter Plot")
         col_d1, col_d2, col_d3, col_d4 = st.columns(4)
         with col_d1:
             dep_feature = st.text_input("Feature Name", value="load_system_total_mw", key="shap_dep_feature")
@@ -558,4 +573,4 @@ with tab_feature:
             st.plotly_chart(fig_dep, use_container_width=True)
             st.markdown("> **Caution Note:** Do not infer direct causality from dependence plots; they illustrate model sensitivity, nonlinear behavior, and regime dependence.")
         else:
-            st.warning(f"⚠️ No dependence data found for feature `{dep_feature}` on `{dep_date_str}`. Check if the feature name is valid.")
+            st.warning(f":material/warning: No dependence data found for feature `{dep_feature}` on `{dep_date_str}`. Check if the feature name is valid.")

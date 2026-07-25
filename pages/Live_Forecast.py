@@ -17,7 +17,7 @@ today = date.today()
 tomorrow = today + timedelta(days=1)
 current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-st.set_page_config(page_title="Live Forecast", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Live Forecast", page_icon=":material/show_chart:", layout="wide")
 inject_custom_css()
 
 FASTAPI_BASE_URL = "http://26.1.105.70:8000"
@@ -31,27 +31,36 @@ elif 'logged_in' not in st.session_state:
 
 # --- 1. Sidebar & Header ---
 # ==========================================
-# 🌟 2. 侧边栏 Logo 渲染（带有毛玻璃遮罩 + 彻底解决文字缺失）
+# :material/star: 2. 侧边栏 Logo 渲染（带有毛玻璃遮罩 + 彻底解决文字缺失）
 # ==========================================
 with st.sidebar:
     render_sidebar_logo()
+    
+    st.page_link("Home.py", label="Terminal Home", icon=":material/dashboard:")
+    st.page_link("pages/Live_Forecast.py", label="Live Forecast", icon=":material/show_chart:")
+    st.page_link("pages/Model_Metrics.py", label="Model Metrics", icon=":material/analytics:")
+    st.markdown("---")
 
-    st.markdown("### ⏱️ Live Operations")
+    st.markdown("### :material/timer: Live Operations")
     selected_date = st.sidebar.date_input(
         "Select Target Date", 
         value=tomorrow, 
         min_value=date(2024, 1, 20)
     )
+    st.markdown("---")
 
+    st.markdown("Copilot Access")
+    st.markdown("Interact with the quantitative RAG engine anytime.")
     st.markdown("---")
     render_global_copilot()
-
     st.markdown("---")
     # 左下角用户状态
     if st.session_state['logged_in']:
         st.markdown("""
             <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; color: #475569; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px;">👤</div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
+                </div>
                 <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
             </div>
         """, unsafe_allow_html=True)
@@ -67,7 +76,12 @@ with st.sidebar:
             st.query_params["token"] = "valid"
             st.rerun()
 
-st.markdown("### 📈 24-Hour ERCOT North Hub Prediction Agent")
+st.markdown("""
+    <h2 style='display: flex; align-items: center'>
+        <img src="https://api.iconify.design/icon-park-outline/analysis.svg?color=%2322AF88" width="30" style="margin-right: 8px;"> 
+        Live Forecast
+    </h2>
+""", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- 2. Data Fetching ---
@@ -92,7 +106,7 @@ def fetch_forecast_data(target_date):
             return status_data, None, "API Error"
             
     except Exception as e:
-        st.error(f"🔌 Connection failed: {e}")
+        st.error(f":material/power_off: Connection failed: {e}")
         return None, None, "Connection Error"
 
 # 抓取极端天气策略建议的独立接口
@@ -173,11 +187,11 @@ if df_predictions is not None and not df_predictions.empty:
     time_str = f"{target_hour:02d}:00"
     
     # ==========================================
-    # 🌟 Priority 1: Core Decision & Classification
+    # :material/star: Priority 1: Core Decision & Classification
     # ==========================================
     
     base_action = selected_hour_data.get("recommended_action", "NO_TRADE")
-    original_confidence = selected_hour_data.get("confidence", 0.0) # 提取原始基础模型置信度
+    original_confidence = selected_hour_data.get("confidence", 0.0) 
     
     s_p_neg = strategy_data.get("p_negative", selected_hour_data.get("p_negative", 0.35))
     s_p_neu = strategy_data.get("p_neutral", selected_hour_data.get("p_neutral", 0.20))
@@ -193,7 +207,6 @@ if df_predictions is not None and not df_predictions.empty:
     if max_prob >= 0.65 and raw_signal in ["INC", "DEC"]:
         final_action = raw_signal
         base_rec = recommendation if recommendation else ("BUY_DA_SELL_RT" if final_action == "DEC" else "SELL_DA_BUY_RT")
-        # 将建议具体到时间段
         display_rec = f"{base_rec} @ HE {time_str}"
     else:
         final_action = "NO_TRADE"
@@ -217,11 +230,13 @@ if df_predictions is not None and not df_predictions.empty:
         f"{recommendation} @ HE {time_str}" if should_trade_today else f"Hold at HE {time_str}"
     )
 
-    action_color = "🟢" if final_action == "INC" else ("🔴" if final_action == "DEC" else "⚪")
-    weather_text = "🚨 High Risk" if s_ext_weather else "✅ Normal"
+    # 使用 IconPark SVG 替换原生 Material 语法，支持 HTML 内联渲染
+    action_color = '<img src="https://api.iconify.design/icon-park-outline/check-one.svg?color=%2310B981" width="28" style="vertical-align: -4px;">' if final_action == "INC" else ('<img src="https://api.iconify.design/icon-park-outline/close-one.svg?color=%23EF4444" width="28" style="vertical-align: -4px;">' if final_action == "DEC" else '<img src="https://api.iconify.design/icon-park-outline/round.svg?color=%2364748B" width="28" style="vertical-align: -4px;">')
+    
+    weather_text = '<img src="https://api.iconify.design/icon-park-outline/attention.svg?color=%23F59E0B" width="28" style="vertical-align: -4px;"> High Risk' if s_ext_weather else '<img src="https://api.iconify.design/icon-park-outline/check-one.svg?color=%2310B981" width="28" style="vertical-align: -4px;"> Normal'
     direction_text = "Downside" if final_action == "INC" else "Upside" if final_action == "DEC" else "Neutral"
-
-    st.markdown(f"##### ⚡ ExtremeWeather_Only Strategy Execution")
+    
+    st.markdown(f"##### :material/bolt: ExtremeWeather_Only Strategy Execution")
     st.caption("Strategy logic: Executes only during extreme weather flags when directional probability is ≥ 65%.")
 
     c1, c2, c3, c4 = st.columns(4)
@@ -243,14 +258,14 @@ if df_predictions is not None and not df_predictions.empty:
     st.write("") 
 
     if final_action != "NO_TRADE":
-        st.success(f"**🤖 Strategy Reasoning ({time_str}):** {reason}")
+        st.success(f"**:material/smart_toy: Strategy Reasoning ({time_str}):** {reason}")
     else:
         if max_prob < 0.65:
-            st.warning(f"⚠️ **Trade Suspended ({time_str}):** Maximum directional probability is below the 0.65 execution threshold.")
+            st.warning(f":material/warning: **Trade Suspended ({time_str}):** Maximum directional probability is below the 0.65 execution threshold.")
         else:
-            st.warning(f"⚠️ **Trade Suspended ({time_str}):** {reason}")
+            st.warning(f":material/warning: **Trade Suspended ({time_str}):** {reason}")
 
-    st.markdown("###### 🎲 3-Way Class Probabilities")
+    st.markdown("###### :material/casino: 3-Way Class Probabilities")
     
     if should_trade_today:
         display_cols = [
@@ -299,13 +314,13 @@ if df_predictions is not None and not df_predictions.empty:
     st.markdown("---")
 
     # ==========================================
-    # 🌟 Priority 2: Probability Trajectory & SHAP
+    # :material/star: Priority 2: Probability Trajectory & SHAP
     # ==========================================
     col_chart, col_driver = st.columns([7, 3])
 
     with col_chart:
-        st.markdown(f"##### 📊 24-Hour Classification Probability Trajectory")
-        st.info("💡 **Chart Guide:** The colored areas represent the model's predicted probability. **The larger the area, the stronger the model's conviction:** 🔴 **Red** (RT < DA), 🟡 **Yellow** (RT ≈ DA), 🟢 **Green** (RT > DA).")
+        st.markdown(f"##### :material/bar_chart: 24-Hour Classification Probability Trajectory")
+        st.info(":material/lightbulb: **Chart Guide:** The colored areas represent the model's predicted probability. **The larger the area, the stronger the model's conviction:** :material/circle: **Red** (RT < DA), :material/circle: **Yellow** (RT ≈ DA), :material/circle: **Green** (RT > DA).")
         
         hours_labels = [f"{int(h):02d}:00" for h in df_predictions.get('ercot_local_hour', range(24))]
         
@@ -320,19 +335,19 @@ if df_predictions is not None and not df_predictions.empty:
         fig_prob.add_trace(go.Scatter(
             x=hours_labels, y=y_pos, mode='lines', name='Positive Spread (RT > DA)', 
             stackgroup='one', 
-            line=dict(color='#10B981', width=1.5), # 深薄荷绿
+            line=dict(color='#10B981', width=1.5), 
             fillcolor='rgba(16, 185, 129, 0.15)'
         ))
         fig_prob.add_trace(go.Scatter(
             x=hours_labels, y=y_neu, mode='lines', name='Neutral Spread (RT ≈ DA)', 
             stackgroup='one', 
-            line=dict(color='#F59E0B', width=1.5), # 沉稳的琥珀黄
+            line=dict(color='#F59E0B', width=1.5), 
             fillcolor='rgba(245, 158, 11, 0.15)'
         ))
         fig_prob.add_trace(go.Scatter(
             x=hours_labels, y=y_neg, mode='lines', name='Negative Spread (RT < DA)', 
             stackgroup='one', 
-            line=dict(color='#EF4444', width=1.5), # 砖红色
+            line=dict(color='#EF4444', width=1.5), 
             fillcolor='rgba(239, 68, 68, 0.15)'
         ))
 
@@ -341,11 +356,11 @@ if df_predictions is not None and not df_predictions.empty:
             template="plotly_white", 
             plot_bgcolor='rgba(0,0,0,0)', 
             paper_bgcolor='rgba(0,0,0,0)', 
-            font=dict(family='Inter, sans-serif', color='#4B5563', size=12), # 字体颜色调浅为灰黑色
+            font=dict(family='Inter, sans-serif', color='#4B5563', size=12), 
             yaxis=dict(
                 title="Classification Probability", 
                 range=[0, 1],
-                gridcolor='#F3F4F6', # 极浅的灰色网格线
+                gridcolor='#F3F4F6', 
                 zerolinecolor='#E5E7EB'
             ), 
             xaxis=dict(
@@ -362,7 +377,7 @@ if df_predictions is not None and not df_predictions.empty:
         st.plotly_chart(fig_prob, use_container_width=True)
 
     with col_driver:
-        st.markdown("##### 🔍 Local SHAP Main Drivers")
+        st.markdown("##### :material/search: Local SHAP Main Drivers")
         features = ["Load", "Net-load", "Ramp", "Historical Spread", "Weather"]
         weights = [42.1, 28.5, 15.2, 9.8, 4.4] 
         features.reverse()
@@ -371,7 +386,7 @@ if df_predictions is not None and not df_predictions.empty:
         # 移除花哨的 colorscale，使用单一的主品牌色 (如深石板灰或主题蓝)
         fig_bar = go.Figure(go.Bar(
             x=weights, y=features, orientation='h', 
-            marker=dict(color='#64748B', opacity=0.85), # 使用高级灰蓝
+            marker=dict(color='#64748B', opacity=0.85), 
             text=[f"{w}%" for w in weights],
             textposition='outside',
             textfont=dict(family='JetBrains Mono', color='#4B5563')
@@ -383,23 +398,23 @@ if df_predictions is not None and not df_predictions.empty:
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(family='Inter, sans-serif', color='#4B5563'),
             height=350, 
-            margin=dict(l=0, r=30, t=20, b=0), # 右侧留出一点空间给 textposition
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=""), # 隐藏X轴，依靠条形图上的数字
+            margin=dict(l=0, r=30, t=20, b=0), 
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=""), 
             yaxis=dict(showgrid=False, zeroline=False)
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 
     # ==========================================
-    # 🌟 Advanced Analytics (Expanded by Default)
+    # :material/star: Advanced Analytics (Expanded by Default)
     # ==========================================
     st.markdown("---")
-    with st.expander("🛠️ Advanced Analytics (Secondary Page)", expanded=True):
+    with st.expander(":material/build: Advanced Analytics (Secondary Page)", expanded=True):
         st.markdown("View the exact numerical outputs from **B2A (Continuous Regression)** and the raw probabilities from **B2B (5-Class Classification)**.")
         
         col_adv1, col_adv2 = st.columns([6, 4])
         
         with col_adv1:
-            st.markdown("###### 📉 Continuous Target: `predicted_spread`")
+            st.markdown("###### :material/trending_down: Continuous Target: `predicted_spread`")
             fig_line = go.Figure()
             
             pred_col = 'predicted_spread' if 'predicted_spread' in df_predictions.columns else 'spread_usd_per_mwh'
@@ -419,7 +434,7 @@ if df_predictions is not None and not df_predictions.empty:
             st.plotly_chart(fig_line, use_container_width=True)
             
         with col_adv2:
-            st.markdown("###### 🎲 Raw 5-Class Probabilities (`p_c1` ~ `p_c5`)")
+            st.markdown("###### :material/casino: Raw 5-Class Probabilities (`p_c1` ~ `p_c5`)")
             raw_probs = {
                 "Class": ["p_c1 (Strong Neg)", "p_c2 (Slight Neg)", "p_c3 (Neutral)", "p_c4 (Slight Pos)", "p_c5 (Strong Pos)"],
                 "Probability": [
@@ -434,4 +449,4 @@ if df_predictions is not None and not df_predictions.empty:
             st.dataframe(df_raw_probs.style.format({'Probability': '{:.2%}'}), use_container_width=True, hide_index=True)
 
 else:
-    st.warning("⚠️ No prediction data available from the API for the selected date.")
+    st.warning(":material/warning: No prediction data available from the API for the selected date.")
