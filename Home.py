@@ -183,35 +183,75 @@ with tab_news:
     st.markdown("### :material/newspaper: Live Energy Market Intelligence")
     st.markdown("Real-time feed monitoring Texas power grid conditions, extreme weather events, and natural gas markets.")
     
-    # 悬浮卡片样式
+    # 悬浮卡片样式 (已放大标题并修复下划线)
+    # 悬浮卡片样式 (彻底修复字体大小、颜色与等宽字体问题)
     st.markdown("""
         <style>
-        .news-card {
+        /* 强制去掉链接自带的下划线和默认排版 */
+        a.news-card {
             display: flex; flex-direction: row; align-items: center; 
-            padding: 16px; margin-bottom: 16px; background-color: #FFFFFF; 
+            padding: 18px; margin-bottom: 16px; background-color: #FFFFFF; 
             border-radius: 12px; border: 1px solid #E5E7EB; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
             transition: all 0.2s ease-in-out;
             cursor: pointer;
-            text-decoration: none;
+            text-decoration: none !important; 
         }
-        .news-card:hover {
+        
+        a.news-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1);
             border-color: #D1D5DB;
         }
-        .news-card img {
-            width: 140px; height: 90px; object-fit: cover; 
-            border-radius: 8px; margin-right: 20px;
+        
+        a.news-card img {
+            width: 150px; height: 100px; object-fit: cover; 
+            border-radius: 8px; margin-right: 24px;
         }
+        
         .news-tag {
-            display: inline-block; padding: 2px 8px; border-radius: 4px; 
-            font-size: 11px; font-weight: 600; margin-bottom: 6px;
-            background-color: #D1FAE5; color: #065F46;
+            display: inline-block; padding: 4px 10px; border-radius: 4px; 
+            font-size: 11px !important; font-weight: 700 !important; margin-bottom: 8px;
+            background-color: #D1FAE5 !important; color: #065F46 !important;
+            font-family: 'Inter', sans-serif !important;
         }
-        .news-content h4 { margin: 0 0 6px 0; color: #111827; font-size: 16px; font-weight: 600; }
-        .news-content p { margin: 0 0 8px 0; color: #4B5563; font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .news-content span { font-size: 12px; color: #9CA3AF; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
+        
+        /* 🌟 核心修复：直接指定 a 标签下的 h4，强制 24px 大字号、极深黑灰色、正常字体 */
+        a.news-card h4 { 
+            margin: 0 0 8px 0 !important; 
+            color: #0F172A !important; 
+            font-size: 24px !important; 
+            font-weight: 800 !important; 
+            font-family: 'Inter', sans-serif !important; 
+            text-decoration: none !important;
+            line-height: 1.3 !important;
+            transition: color 0.2s ease;
+        }
+        
+        /* 鼠标悬浮时，标题变成主题蓝 */
+        a.news-card:hover h4 {
+            color: #2563EB !important;
+        }
+        
+        /* 强制正文颜色加深，字号稍微调大 */
+        a.news-card p { 
+            margin: 0 0 10px 0 !important; 
+            color: #334155 !important; 
+            font-size: 15px !important; 
+            line-height: 1.5 !important; 
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
+            text-decoration: none !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        /* 日期/来源 颜色加深 */
+        a.news-card span.news-meta { 
+            font-size: 13px !important; 
+            color: #64748B !important; 
+            font-weight: 600 !important; 
+            font-family: 'JetBrains Mono', monospace !important; 
+            text-decoration: none !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
@@ -253,7 +293,7 @@ with tab_news:
                     <a href="{url}" target="_blank" class="news-card">
                         <img src="{img_url}" alt="News Image" onerror="this.src='https://images.unsplash.com/photo-1478265409131-1f65c88f965c?auto=format&fit=crop&q=80&w=300&h=200';">
                         <div class="news-content">
-                            <span class="news-tag">LIVE MARKET UPDATE</span>
+                            <span class="news-meta">{date_str} &nbsp;•&nbsp; {source}</span>
                             <h4>{title}</h4>
                             <p>{desc}</p>
                             <span>{date_str} &nbsp;•&nbsp; {source}</span>
