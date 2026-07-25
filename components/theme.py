@@ -1,0 +1,226 @@
+# components/theme.py
+import streamlit as st
+import base64
+import os
+
+def get_base64_image(image_path):
+    """安全读取本地图片并转为 Base64"""
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return ""
+
+def inject_custom_css():
+    """全局注入 Mercury 风格高科技浅色 CSS 主题（纯粹而优雅的板块整体加载浮入）"""
+    st.markdown("""
+        <style>
+        /* ==========================================
+           1. 字体与全局背景
+           ========================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        .stApp {
+            background-color: #FBFBFB !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Inter', sans-serif !important;
+            color: #111827 !important;
+            font-weight: 600 !important;
+            letter-spacing: -0.02em !important;
+        }
+        
+        [data-testid="stHeader"] {
+            background-color: transparent !important;
+        }
+
+        /* ==========================================
+           2. 侧边栏及顶部悬浮毛玻璃遮罩 (Frosted Glass Mask)
+           ========================================== */
+        [data-testid="stSidebarNav"] {
+            padding-top: 65px !important; 
+        }
+
+        [data-testid="stSidebarContent"] {
+            padding-top: 0px !important;
+        }
+
+        [data-testid="stSidebar"] {
+            contain: layout !important; 
+        }
+
+        [data-testid="stSidebarCollapseButton"] {
+            z-index: 1000000 !important;
+            position: fixed !important;
+            top: 14px !important;
+            right: 12px !important;
+        }
+
+        [data-testid="stSidebarCollapseButton"] button {
+            background: transparent !important;
+            border: none !important;
+            color: #475569 !important;
+        }
+
+        .sidebar-logo-container {
+            position: fixed !important;
+            top: 0px !important;
+            left: 0px !important;
+            width: 100% !important;
+            height: 60px !important;
+            z-index: 999999 !important;
+            
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            padding-left: 18px !important;
+            padding-right: 50px !important;
+            
+            background: rgba(248, 250, 252, 0.88) !important; 
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+            box-sizing: border-box !important;
+        }
+
+        .sidebar-logo-text {
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #0F172A !important;
+            font-weight: 800 !important;
+            font-size: 24px !important;
+            line-height: 1 !important;
+            letter-spacing: -0.5px !important;
+            white-space: nowrap !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* ==========================================
+           3. 数据表格与卡片 (Mercury Style)
+           ========================================== */
+        .mercury-card {
+            background-color: #FFFFFF;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            height: 200px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .mercury-card-title {
+            color: #111827;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        
+        .mercury-card-text {
+            color: #6B7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        [data-testid="stDataFrame"] {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 13px !important;
+        }
+        
+        [data-testid="stDataFrame"] > div {
+            border: none !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+            border-radius: 8px !important;
+        }
+
+        /* ==========================================
+           4. 按钮与提示框 (Buttons & Alerts)
+           ========================================== */
+        [data-testid="stButton"] button {
+            background-color: #FFFFFF !important;
+            color: #111827 !important;
+            border: 1px solid #D1D5DB !important;
+            border-radius: 6px !important;
+            padding: 8px 16px !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        }
+        
+        [data-testid="stButton"] button:hover {
+            border-color: #9CA3AF !important;
+            background-color: #F9FAFB !important;
+            color: #000000 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08) !important;
+            transform: translateY(-1px) !important;
+        }
+        
+        [data-testid="stButton"] button:active {
+            transform: scale(0.97) !important;
+            box-shadow: none !important;
+            background-color: #F3F4F6 !important;
+        }
+        
+        [data-testid="stAlert"] {
+            border-radius: 8px !important;
+            border: 1px solid #E5E7EB !important;
+            padding: 12px 16px !important;
+            background-color: #FFFFFF !important; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+            border-left-width: 4px !important;
+        }
+
+        /* ==========================================
+           5. 🌟 板块专属页面加载浮入动效（2.2s 慢速、交错方向、单次锁定）
+           ========================================== */
+        @keyframes terminalLoadBottom {
+            0% { opacity: 0; transform: translateY(120px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes terminalLoadLeft {
+            0% { opacity: 0; transform: translateX(-120px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes terminalLoadRight {
+            0% { opacity: 0; transform: translateX(120px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 默认主页面所有板块：从下方慢速浮入 */
+        [data-testid="stMain"] [data-testid="stVerticalBlock"] > div {
+            opacity: 0;
+            animation: terminalLoadBottom 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 交错：第 2 个板块从左侧滑入 */
+        [data-testid="stMain"] [data-testid="stVerticalBlock"] > div:nth-child(3n + 2) {
+            animation-name: terminalLoadLeft;
+        }
+
+        /* 交错：第 3 个板块从右侧滑入 */
+        [data-testid="stMain"] [data-testid="stVerticalBlock"] > div:nth-child(3n + 3) {
+            animation-name: terminalLoadRight;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+def render_sidebar_logo():
+    """渲染侧边栏顶部自适应毛玻璃 Logo 遮罩"""
+    icon_base64 = get_base64_image("pages/icon.png")
+    
+    if icon_base64:
+        img_html = f'<img src="data:image/png;base64,{icon_base64}" style="width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: block;">'
+    else:
+        img_html = '<div style="background:#10B981; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-right:12px; font-size:18px; color:white;">⚡</div>'
+
+    st.sidebar.markdown(f"""
+        <div class="sidebar-logo-container">
+            {img_html}
+            <span class="sidebar-logo-text">GridWise</span>
+        </div>
+    """, unsafe_allow_html=True)

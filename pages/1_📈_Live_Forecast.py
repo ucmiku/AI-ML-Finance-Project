@@ -7,6 +7,10 @@ from datetime import datetime, date, timedelta
 from components.agent_ui import render_global_copilot
 import pydeck as pdk
 from integration.streamlit_embed import render_ercot_map_workbench
+import base64
+import os
+from components.theme import inject_custom_css, render_sidebar_logo
+
 
 # --- 0. Basic Configuration ---
 today = date.today()
@@ -14,30 +18,10 @@ tomorrow = today + timedelta(days=1)
 current_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 st.set_page_config(page_title="Live Forecast", page_icon="📈", layout="wide")
+inject_custom_css()
 
 FASTAPI_BASE_URL = "http://26.1.105.70:8000"
 
-# ==========================================
-# 🌟 定制样式与登录检测 (全侧边栏对齐主页)
-# ==========================================
-st.markdown("""
-    <style>
-    [data-testid="stSidebarNav"] {
-        padding-top: 80px !important; 
-    }
-    .sidebar-logo-container {
-        position: fixed;
-        top: 25px;
-        left: 20px;
-        width: 250px;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #E2E8F0;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # 持久化登录检测
 if "token" in st.query_params and st.query_params["token"] == "valid":
@@ -46,16 +30,11 @@ elif 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
 # --- 1. Sidebar & Header ---
+# ==========================================
+# 🌟 2. 侧边栏 Logo 渲染（带有毛玻璃遮罩 + 彻底解决文字缺失）
+# ==========================================
 with st.sidebar:
-    # 顶部固定 Logo
-    st.markdown("""
-        <div class="sidebar-logo-container">
-            <div style='background-color: #10B981; color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 12px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);'>
-                ⚡
-            </div>
-            <h2 style='margin: 0; color: #1E293B; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;'>GridWise</h2>
-        </div>
-    """, unsafe_allow_html=True)
+    render_sidebar_logo()
 
     st.markdown("### ⏱️ Live Operations")
     selected_date = st.sidebar.date_input(
@@ -330,39 +309,83 @@ if df_predictions is not None and not df_predictions.empty:
         
         hours_labels = [f"{int(h):02d}:00" for h in df_predictions.get('ercot_local_hour', range(24))]
         
+        # 1. 重构 24小时概率分布图 (替换原有的 plotly_dark 设定)
         fig_prob = go.Figure()
         
         y_pos = df_predictions.get('p_positive', np.random.uniform(0.2, 0.5, len(hours_labels)))
         y_neu = df_predictions.get('p_neutral', np.random.uniform(0.1, 0.3, len(hours_labels)))
         y_neg = df_predictions.get('p_negative', 1.0 - (y_pos + y_neu))
         
-        fig_prob.add_trace(go.Scatter(x=hours_labels, y=y_pos, mode='lines', name='Positive Spread Prob (RT > DA)', stackgroup='one', line=dict(color='#00E676'), fillcolor='rgba(0, 230, 118, 0.3)'))
-        fig_prob.add_trace(go.Scatter(x=hours_labels, y=y_neu, mode='lines', name='Neutral Spread Prob (RT ≈ DA)', stackgroup='one', line=dict(color='#FFCA28'), fillcolor='rgba(255, 202, 40, 0.3)'))
-        fig_prob.add_trace(go.Scatter(x=hours_labels, y=y_neg, mode='lines', name='Negative Spread Prob (RT < DA)', stackgroup='one', line=dict(color='#FF5252'), fillcolor='rgba(255, 82, 82, 0.3)'))
+        # 使用更高级的金融色系与透明填充
+        fig_prob.add_trace(go.Scatter(
+            x=hours_labels, y=y_pos, mode='lines', name='Positive Spread (RT > DA)', 
+            stackgroup='one', 
+            line=dict(color='#10B981', width=1.5), # 深薄荷绿
+            fillcolor='rgba(16, 185, 129, 0.15)'
+        ))
+        fig_prob.add_trace(go.Scatter(
+            x=hours_labels, y=y_neu, mode='lines', name='Neutral Spread (RT ≈ DA)', 
+            stackgroup='one', 
+            line=dict(color='#F59E0B', width=1.5), # 沉稳的琥珀黄
+            fillcolor='rgba(245, 158, 11, 0.15)'
+        ))
+        fig_prob.add_trace(go.Scatter(
+            x=hours_labels, y=y_neg, mode='lines', name='Negative Spread (RT < DA)', 
+            stackgroup='one', 
+            line=dict(color='#EF4444', width=1.5), # 砖红色
+            fillcolor='rgba(239, 68, 68, 0.15)'
+        ))
 
+        # 统一使用 plotly_white，并隐藏网格线，增加呼吸感
         fig_prob.update_layout(
-            template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', 
-            yaxis=dict(title="Classification Probability", range=[0, 1]), 
+            template="plotly_white", 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            paper_bgcolor='rgba(0,0,0,0)', 
+            font=dict(family='Inter, sans-serif', color='#4B5563', size=12), # 字体颜色调浅为灰黑色
+            yaxis=dict(
+                title="Classification Probability", 
+                range=[0, 1],
+                gridcolor='#F3F4F6', # 极浅的灰色网格线
+                zerolinecolor='#E5E7EB'
+            ), 
+            xaxis=dict(
+                gridcolor='#F3F4F6',
+                zerolinecolor='#E5E7EB'
+            ),
             hovermode="x unified",
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+            legend=dict(
+                orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1,
+                font=dict(color='#374151')
+            ),
+            margin=dict(l=0, r=0, t=10, b=0)
         )
         st.plotly_chart(fig_prob, use_container_width=True)
 
     with col_driver:
-        st.markdown("##### 🔍 Local SHAP Top 5 & Main Drivers")
+        st.markdown("##### 🔍 Local SHAP Main Drivers")
         features = ["Load", "Net-load", "Ramp", "Historical Spread", "Weather"]
         weights = [42.1, 28.5, 15.2, 9.8, 4.4] 
         features.reverse()
         weights.reverse()
         
+        # 移除花哨的 colorscale，使用单一的主品牌色 (如深石板灰或主题蓝)
         fig_bar = go.Figure(go.Bar(
             x=weights, y=features, orientation='h', 
-            marker=dict(colorscale='Greens', color=weights)
+            marker=dict(color='#64748B', opacity=0.85), # 使用高级灰蓝
+            text=[f"{w}%" for w in weights],
+            textposition='outside',
+            textfont=dict(family='JetBrains Mono', color='#4B5563')
         ))
+        
         fig_bar.update_layout(
-            template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', 
-            height=350, margin=dict(l=0, r=0, t=10, b=0),
-            xaxis_title="SHAP Value Impact"
+            template="plotly_white", 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(family='Inter, sans-serif', color='#4B5563'),
+            height=350, 
+            margin=dict(l=0, r=30, t=20, b=0), # 右侧留出一点空间给 textposition
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, title=""), # 隐藏X轴，依靠条形图上的数字
+            yaxis=dict(showgrid=False, zeroline=False)
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 

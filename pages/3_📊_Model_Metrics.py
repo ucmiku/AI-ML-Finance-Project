@@ -8,33 +8,18 @@ import requests
 import numpy as np
 from datetime import date, timedelta
 from components.agent_ui import render_global_copilot
+import os
+from components.theme import inject_custom_css, render_sidebar_logo
 
 # Page Configuration
 st.set_page_config(page_title="Model Matrix", page_icon="🧪", layout="wide")
+inject_custom_css()
 
 FASTAPI_BASE_URL = "http://26.1.105.70:8000"
 
 # ==========================================
 # 🌟 定制样式与登录检测 (全侧边栏对齐主页)
 # ==========================================
-st.markdown("""
-    <style>
-    [data-testid="stSidebarNav"] {
-        padding-top: 80px !important; 
-    }
-    .sidebar-logo-container {
-        position: fixed;
-        top: 25px;
-        left: 20px;
-        width: 250px;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #E2E8F0;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # 持久化登录检测
 if "token" in st.query_params and st.query_params["token"] == "valid":
@@ -43,16 +28,8 @@ elif 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
 with st.sidebar:
-    # 顶部固定 Logo
-    st.markdown("""
-        <div class="sidebar-logo-container">
-            <div style='background-color: #10B981; color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 12px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);'>
-                ⚡
-            </div>
-            <h2 style='margin: 0; color: #1E293B; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;'>GridWise</h2>
-        </div>
-    """, unsafe_allow_html=True)
-
+    render_sidebar_logo()
+    
     st.markdown("### ⚙️ Copilot Access")
     st.markdown("Interact with the quantitative RAG engine anytime.")
     st.markdown("---")
