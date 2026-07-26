@@ -68,16 +68,89 @@ def restart_game():
 # ==========================================
 # 1. 核心全局 CSS & 🌟 动态转场动效注入
 # ==========================================
-# 动态获取当前计数器，强制浏览器认为这是一个全新的动画！
 t_id = st.session_state.anim_counter
 
-st.markdown(f"""
+# 第一部分：静态样式。使用普通字符串 """ 包裹，正常使用单大括号 {}
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600;700&display=swap');
 
-#MainMenu {{visibility: hidden;}} header {{visibility: hidden;}} footer {{visibility: hidden;}}
+#MainMenu {visibility: hidden;} header {visibility: hidden;} footer {visibility: hidden;}
 
-/* 🌟 全局容器从暗到亮的交错动效 (时间拉长至 2.5s，更从容优雅) */
+/* 卡片上浮动效 */
+@keyframes elegantFadeUp {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+    animation: elegantFadeUp 2.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    opacity: 0;
+}
+.delay-1 { animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }
+.delay-2 { animation-delay: 0.8s; opacity: 0; animation-fill-mode: forwards; }
+
+/* 卡片样式 */
+.glass-card {
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px; padding: 40px; max-width: 550px; margin: 4vh auto 30px auto;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+    text-align: center; border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.glass-card-wide {
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px; padding: 30px; max-width: 950px; margin: 2vh auto 30px auto;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.glass-card-full {
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px; padding: 25px 30px; margin: 0 0 20px 0; width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.bulletin-board {
+    background-color: #F8F7F2; border: 1px solid #D6D3C4; border-radius: 12px; padding: 25px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08), inset 0 0 40px rgba(139,115,85,0.02); margin-bottom: 20px;
+}
+
+/* 字体 */
+.glass-card h1, .glass-card-wide h1, .glass-card-full h1 { font-family: 'Lora', serif; color: #111827; font-size: 38px; margin-bottom: 15px; line-height: 1.2; }
+.glass-card h3, .glass-card-wide h3 { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+.glass-card p, .glass-card-wide p { font-family: 'Inter', sans-serif; font-size: 16px; color: #374151; line-height: 1.6; }
+
+/* 🌟 图表容器圆角修复 */
+div.stPlotlyChart {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+div.stPlotlyChart > div {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+.js-plotly-plot .plotly {
+    border-radius: 12px !important;
+}
+
+/* 按钮样式 */
+div[data-testid="stButton"] > button {
+    border-radius: 6px !important; padding: 6px 0 !important; font-size: 12px !important; font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important; white-space: nowrap !important; min-width: 100% !important; transition: all 0.3s ease !important;
+    border: 1px solid #D6D3C4 !important;
+}
+div[data-testid="stButton"] > button[data-testid="baseButton-secondary"] {
+    background: #FFFFFF !important; color: #44403C !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+div[data-testid="stButton"] > button[data-testid="baseButton-primary"] {
+    background: #047857 !important; color: #FFFFFF !important; border-color: #047857 !important;
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3) !important;
+}
+div[data-testid="stButton"] > button:hover { transform: translateY(-2px); border-color: #047857 !important; }
+</style>
+""", unsafe_allow_html=True)
+
+# 第二部分：动态转场样式。使用 f""" 包裹，CSS大括号必须双写 {{ }}
+st.markdown(f"""
+<style>
 @keyframes globalFadeAndBrighten_{t_id} {{
     0% {{ opacity: 0; filter: brightness(0.2); }}
     100% {{ opacity: 1; filter: brightness(1); }}
@@ -86,70 +159,6 @@ st.markdown(f"""
     padding-top: 3rem; padding-bottom: 3rem; 
     animation: globalFadeAndBrighten_{t_id} 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
 }}
-
-/* 🌟 内部元素的优雅上浮动效 (时间拉长至 2.0s) */
-@keyframes elegantFadeUp_{t_id} {{
-    0% {{ opacity: 0; transform: translateY(40px); }}
-    100% {{ opacity: 1; transform: translateY(0); }}
-}}
-.animate-fade-up {{
-    animation: elegantFadeUp_{t_id} 2.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
-    opacity: 0;
-}}
-
-/* 延迟层级同步拉长，保持错落有致的呼吸感 */
-.delay-1 {{ animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }}
-.delay-2 {{ animation-delay: 0.8s; opacity: 0; animation-fill-mode: forwards; }}
-
-/* 卡片样式 */
-.glass-card {{
-    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-radius: 16px; padding: 40px; max-width: 550px; margin: 4vh auto 30px auto;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
-    text-align: center; border: 1px solid rgba(255, 255, 255, 0.5);
-}}
-
-.glass-card-wide {{
-    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-radius: 16px; padding: 30px; max-width: 950px; margin: 2vh auto 30px auto;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-}}
-
-.glass-card-full {{
-    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-radius: 12px; padding: 25px 30px; margin: 0 0 20px 0; width: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-}}
-
-.bulletin-board {{
-    background-color: #F8F7F2; border: 1px solid #D6D3C4; border-radius: 12px; padding: 25px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08), inset 0 0 40px rgba(139,115,85,0.02); margin-bottom: 20px;
-}}
-
-/* 字体排版 */
-.glass-card h1, .glass-card-wide h1, .glass-card-full h1 {{ font-family: 'Lora', serif; color: #111827; font-size: 38px; margin-bottom: 15px; line-height: 1.2; }}
-.glass-card h3, .glass-card-wide h3 {{ font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }}
-.glass-card p, .glass-card-wide p {{ font-family: 'Inter', sans-serif; font-size: 16px; color: #374151; line-height: 1.6; }}
-
-/* 按钮样式 */
-div[data-testid="stButton"] > button {{
-    border-radius: 6px !important; padding: 6px 0 !important; font-size: 12px !important; font-family: 'Inter', sans-serif !important;
-    font-weight: 700 !important; white-space: nowrap !important; min-width: 100% !important; transition: all 0.3s ease !important;
-    border: 1px solid #D6D3C4 !important;
-}}
-
-div[data-testid="stButton"] > button[data-testid="baseButton-secondary"] {{
-    background: #FFFFFF !important; color: #44403C !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
-}}
-
-div[data-testid="stButton"] > button[data-testid="baseButton-primary"] {{
-    background: #047857 !important; color: #FFFFFF !important; border-color: #047857 !important;
-    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3) !important;
-}}
-
-div[data-testid="stButton"] > button:hover {{ transform: translateY(-2px); border-color: #047857 !important; }}
 </style>
 """, unsafe_allow_html=True)
 
