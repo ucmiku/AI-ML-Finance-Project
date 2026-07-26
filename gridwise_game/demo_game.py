@@ -131,20 +131,29 @@ div.stPlotlyChart > div {
     border-radius: 12px !important;
 }
 
-/* 按钮样式 */
+/* 按钮样式 (兼容新老版本 Streamlit) */
 div[data-testid="stButton"] > button {
     border-radius: 6px !important; padding: 6px 0 !important; font-size: 12px !important; font-family: 'Inter', sans-serif !important;
     font-weight: 700 !important; white-space: nowrap !important; min-width: 100% !important; transition: all 0.3s ease !important;
     border: 1px solid #D6D3C4 !important;
 }
-div[data-testid="stButton"] > button[data-testid="baseButton-secondary"] {
+
+/* 未选中状态 / Secondary */
+div[data-testid="stButton"] > button[data-testid="baseButton-secondary"],
+div[data-testid="stButton"] > button[kind="secondary"] {
     background: #FFFFFF !important; color: #44403C !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
 }
-div[data-testid="stButton"] > button[data-testid="baseButton-primary"] {
+
+/* 选中状态 / Primary (强制翡翠绿) */
+div[data-testid="stButton"] > button[data-testid="baseButton-primary"],
+div[data-testid="stButton"] > button[kind="primary"] {
     background: #047857 !important; color: #FFFFFF !important; border-color: #047857 !important;
     box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3) !important;
 }
-div[data-testid="stButton"] > button:hover { transform: translateY(-2px); border-color: #047857 !important; }
+
+div[data-testid="stButton"] > button:hover { 
+    transform: translateY(-2px); border-color: #047857 !important; 
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -251,7 +260,7 @@ elif st.session_state.scene == 2:
         yaxis=dict(showgrid=True, gridcolor='#E7E5E4', title="Temp (°C) / Humidity (%)"),
         yaxis2=dict(showgrid=False, title="Wind (m/s) / Precip (mm)")
     )
-    st.plotly_chart(fig_weather, use_container_width=True)
+    st.plotly_chart(fig_weather, use_container_width=True, theme=None)
     
     st.markdown(f"""
         <div style="border-top: 1px dashed #D6D3C4; margin-top: 10px; padding-top: 10px;">
@@ -318,7 +327,7 @@ elif st.session_state.scene == 3:
             plot_bgcolor=board_bg_color, paper_bgcolor=board_bg_color,
             legend=dict(orientation="h", y=1.1, font=dict(color="#292524", weight="bold"))
         )
-        st.plotly_chart(fig_res, use_container_width=True)
+        st.plotly_chart(fig_res, use_container_width=True, theme=None)
         st.markdown("""
     </div>
 """, unsafe_allow_html=True)

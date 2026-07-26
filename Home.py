@@ -5,6 +5,9 @@ from utils import init_database
 from components.agent_ui import render_global_copilot
 from integration.streamlit_embed import render_ercot_map_workbench
 from components.theme import inject_custom_css, render_sidebar_logo
+# 1. 在顶部导入部分，加上忽略警告的代码，防止控制台刷屏
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # 1. 页面配置
 st.set_page_config(
@@ -23,13 +26,12 @@ elif 'logged_in' not in st.session_state:
 # ==========================================
 # 2. 核心功能：NewsAPI 实时抓取 (带缓存防超额)
 # ==========================================
-@st.cache_data(ttl=3600)  # 缓存 1 小时，防止每次刷新消耗 API 额度
+@st.cache_data(ttl=3600)
 def fetch_live_market_news(api_key):
     if not api_key:
         return []
     
     url = "https://newsapi.org/v2/everything"
-    # 精准检索德州电网、ERCOT与天然气相关新闻
     params = {
         "q": "(ERCOT OR \"Texas grid\" OR \"natural gas\")",
         "language": "en",
@@ -38,7 +40,8 @@ def fetch_live_market_news(api_key):
         "apiKey": api_key
     }
     try:
-        response = requests.get(url, params=params, timeout=10)
+        # 【关键修复】加上 verify=False 绕过证书拦截
+        response = requests.get(url, params=params, timeout=10, verify=False)
         if response.status_code == 200:
             return response.json().get("articles", [])
         else:
@@ -74,7 +77,6 @@ with st.sidebar:
         
     st.markdown("Copilot Access")
     st.markdown("Interact with the quantitative RAG engine anytime.")
-    st.markdown("---")
     render_global_copilot()
     
     # Global Settings
@@ -151,7 +153,7 @@ with tab_overview:
 
     with col1:
         st.markdown("""
-            <div class="mercury-card">
+            <div class="mercury-card morandi-sage">
                 <h4 class="mercury-card-title">Live Forecast</h4>
                 <p class="mercury-card-text">
                     Real-time ERCOT DAM-RTM spread predictions powered by the C1 Agent. Monitor 24-hour price trajectories and extreme weather flags.
@@ -161,7 +163,7 @@ with tab_overview:
 
     with col2:
         st.markdown("""
-            <div class="mercury-card">
+            <div class="mercury-card morandi-rose">
                 <h4 class="mercury-card-title">Trading Agent</h4>
                 <p class="mercury-card-text">
                     LLM-driven trading assistant utilizing DeepSeek. Formulate strategies, analyze risk, and interact via natural language.
@@ -171,7 +173,7 @@ with tab_overview:
 
     with col3:
         st.markdown("""
-            <div class="mercury-card">
+            <div class="mercury-card morandi-haze">
                 <h4 class="mercury-card-title">Model Metrics</h4>
                 <p class="mercury-card-text">
                     Comprehensive backtest analysis, strategy leaderboard, actual vs predicted tracking, and Explainable AI feature attribution.

@@ -51,7 +51,6 @@ with st.sidebar:
 
     st.markdown("Copilot Access")
     st.markdown("Interact with the quantitative RAG engine anytime.")
-    st.markdown("---")
     render_global_copilot()
     st.markdown("---")
     # 左下角用户状态

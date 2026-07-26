@@ -97,18 +97,17 @@ def inject_custom_css():
             white-space: nowrap !important;
             font-family: 'Inter', sans-serif !important;
         }
-
+        
         /* ==========================================
-           3. 数据表格与卡片 (Mercury Style)
+           3. 数据表格与卡片 (Morandi Style)
            ========================================== */
+        /* 卡片基础骨架 */
         .mercury-card {
-            background-color: #FFFFFF;
             padding: 24px;
             border-radius: 12px;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
             height: 200px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px); /* 毛玻璃透明感 */
         }
         
         .mercury-card-title {
@@ -120,20 +119,42 @@ def inject_custom_css():
         }
         
         .mercury-card-text {
-            color: #6B7280;
+            color: #475569;
             font-size: 14px;
             line-height: 1.6;
         }
-        
-        [data-testid="stDataFrame"] {
-            font-family: 'JetBrains Mono', monospace !important;
-            font-size: 13px !important;
+
+        /* 莫兰迪一：鼠尾草绿 (Sage Green) */
+        .morandi-sage {
+            background: rgba(184, 196, 185, 0.15);
+            border: 1px solid rgba(184, 196, 185, 0.4);
         }
-        
-        [data-testid="stDataFrame"] > div {
-            border: none !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-            border-radius: 8px !important;
+        .morandi-sage:hover {
+            border-color: rgba(184, 196, 185, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(184, 196, 185, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 莫兰迪二：茱萸粉 (Dusty Rose) */
+        .morandi-rose {
+            background: rgba(212, 196, 199, 0.15);
+            border: 1px solid rgba(212, 196, 199, 0.4);
+        }
+        .morandi-rose:hover {
+            border-color: rgba(212, 196, 199, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(212, 196, 199, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 莫兰迪三：雾霾蓝 (Haze Blue) */
+        .morandi-haze {
+            background: rgba(185, 196, 208, 0.15);
+            border: 1px solid rgba(185, 196, 208, 0.4);
+        }
+        .morandi-haze:hover {
+            border-color: rgba(185, 196, 208, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(185, 196, 208, 0.3);
+            transform: translateY(-2px);
         }
 
         /* ==========================================
