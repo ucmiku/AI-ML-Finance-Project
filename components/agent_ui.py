@@ -82,10 +82,13 @@ def render_global_copilot():
                                 ai_response = response.json().get("answer", "No response.")
                             else:
                                 ai_response = f"⚠️ Error {response.status_code}: {response.text}"
-                            
-                            clean_response = agent_response.replace("*", "")
+
+                            # ✅ 修复：使用正确的变量名 ai_response
+                            clean_response = ai_response.replace("*", "")
                             st.markdown(clean_response)
-                            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+
+                            # ✅ 建议：将清理后的 clean_response 存入历史记录，而不是带星号的
+                            st.session_state.chat_history.append({"role": "assistant", "content": clean_response})
                             save_memory(st.session_state.chat_history)
                         except Exception as e:
                             st.error(f"❌ Error: {str(e)}")
