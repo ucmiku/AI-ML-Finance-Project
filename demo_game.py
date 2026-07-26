@@ -3,452 +3,340 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import base64
-import random
-
-st.set_page_config(page_title="North Hub Survival", layout="wide", initial_sidebar_state="collapsed")
+import os
 
 # ==========================================
-# 工具函数：图片与撒钱特效引擎
+# 0. 工具函数与配置
 # ==========================================
+st.set_page_config(page_title="GridWise Climate Game", layout="wide", initial_sidebar_state="collapsed")
+
 def get_base64_image(image_path):
-    try:
+    if os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
             encoded_string = base64.b64encode(img_file.read()).decode()
-        return f"data:image/jpeg;base64,{encoded_string}"
-    except FileNotFoundError:
-        return ""
+        ext = image_path.split('.')[-1]
+        mime = "image/png" if ext.lower() == "png" else "image/jpeg"
+        return f"data:{mime};base64,{encoded_string}"
+    return ""
 
-def render_background(image_file, zoom=False, dark=False):
-    bg_url = get_base64_image(image_file)
-    if not bg_url:
-        return
-    transform_css = "transform: scale(3.5) translate(5%, 10%);" if zoom else "transform: scale(1);"
-    filter_css = "filter: brightness(0.3) blur(2px);" if dark else ("filter: brightness(0.4) blur(2px);" if zoom else "filter: brightness(0.8);")
-    st.markdown(f"""
-    <style>
-    .stApp::before {{
-        content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-image: url("{bg_url}"); background-size: cover; background-position: center;
-        z-index: -999; transition: transform 2.5s ease-in-out, filter 2s ease;
-        {transform_css} {filter_css}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+def render_background(image_path):
+    bg_url = get_base64_image(image_path)
+    if bg_url:
+        st.markdown(f"""
+        <style>
+        .stApp {{
+            background-image: url("{bg_url}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
 
-# 专属：定制化漫天撒金币特效
-def falling_coins_effect():
-    css = """
-    <style>
-    .coin-container {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        pointer-events: none; z-index: 9999; overflow: hidden;
-    }
-    .coin {
-        position: absolute; top: -50px;
-        animation-name: fallAndSpin;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-    }
-    @keyframes fallAndSpin {
-        0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(110vh) rotate(360deg); opacity: 0.5; }
-    }
-    </style>
-    <div class="coin-container">
-    """
-    emojis = ['💰', '🪙', '✨', '💵']
-    for _ in range(45):
-        emoji = random.choice(emojis)
-        left = random.randint(0, 100)
-        duration = random.uniform(2.5, 6.0) # 下落速度随机
-        delay = random.uniform(0, 3.0)      # 延迟出现随机
-        size = random.randint(25, 50)       # 图标大小随机
-        css += f'<div class="coin" style="left: {left}%; font-size: {size}px; animation-duration: {duration}s; animation-delay: {delay}s;">{emoji}</div>'
-    css += "</div>"
-    st.markdown(css, unsafe_allow_html=True)
+# 初始化 Session State
+if 'scene' not in st.session_state:
+    st.session_state.scene = 0
+if 'selected_hours' not in st.session_state:
+    st.session_state.selected_hours = []
+# 🌟 核心：专门用于控制切页动效的计数器
+if 'anim_counter' not in st.session_state:
+    st.session_state.anim_counter = 0
+
+# 回调函数
+def change_scene(new_scene):
+    st.session_state.scene = new_scene
+    st.session_state.anim_counter += 1  # 切换场景，触发动画
+
+def toggle_hour(hour):
+    if hour in st.session_state.selected_hours:
+        st.session_state.selected_hours.remove(hour)
+    elif len(st.session_state.selected_hours) < 3:
+        st.session_state.selected_hours.append(hour)
+    # 注意：选时间不增加计数器，保证页面不闪烁！
+
+def settle_market():
+    st.session_state.user_picks_idx = [hours_str.index(h) for h in st.session_state.selected_hours]
+    st.session_state.user_profit = sum([true_spreads[i] for i in st.session_state.user_picks_idx])
+    st.session_state.scene = 3
+    st.session_state.anim_counter += 1  # 切换场景，触发动画
+
+def restart_game():
+    st.session_state.selected_hours = []
+    st.session_state.scene = 0
+    st.session_state.anim_counter += 1  # 切换场景，触发动画
 
 # ==========================================
-# 核心全局 CSS 引擎
+# 1. 核心全局 CSS & 🌟 动态转场动效注入
 # ==========================================
-st.markdown("""
+# 动态获取当前计数器，强制浏览器认为这是一个全新的动画！
+t_id = st.session_state.anim_counter
+
+st.markdown(f"""
 <style>
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { background: transparent !important; }
-#MainMenu {visibility: hidden;} header {visibility: hidden;} footer {visibility: hidden;}
-.block-container {padding: 0rem; max-width: 100%;}
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600;700&display=swap');
 
-/* 覆盖 Streamlit Primary 按钮的默认荧光色 */
-button[data-testid="baseButton-primary"] {
-    background-color: #2C3E50 !important; /* 沉稳的深蓝灰 */
-    color: #E2E8F0 !important;            /* 柔和的灰白色 */
-    border: 1px solid #4A5568 !important; /* 细腻的边框 */
-    transition: all 0.3s ease;
-}
+#MainMenu {{visibility: hidden;}} header {{visibility: hidden;}} footer {{visibility: hidden;}}
 
-button[data-testid="baseButton-primary"]:hover {
-    background-color: #34495E !important; 
-    border-color: #3498DB !important;     /* 悬浮时带出一点专业金融蓝 */
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.4) !important;
-}
+/* 🌟 全局容器从暗到亮的交错动效 (时间拉长至 2.5s，更从容优雅) */
+@keyframes globalFadeAndBrighten_{t_id} {{
+    0% {{ opacity: 0; filter: brightness(0.2); }}
+    100% {{ opacity: 1; filter: brightness(1); }}
+}}
+.block-container {{ 
+    padding-top: 3rem; padding-bottom: 3rem; 
+    animation: globalFadeAndBrighten_{t_id} 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+}}
 
-/* === Scene 0: 高级动态加载页面（增强版） === */
-.scene0-bg {
-    position: fixed; 
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    /* 保持科幻地球背景图 */
-    background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    z-index: -1001;
-    /* 【修改】：时间从40s缩短到18s，让你明显看到它在平移和呼吸 */
-    animation: slowPan 18s ease-in-out infinite alternate;
-}
+/* 🌟 内部元素的优雅上浮动效 (时间拉长至 2.0s) */
+@keyframes elegantFadeUp_{t_id} {{
+    0% {{ opacity: 0; transform: translateY(40px); }}
+    100% {{ opacity: 1; transform: translateY(0); }}
+}}
+.animate-fade-up {{
+    animation: elegantFadeUp_{t_id} 2.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    opacity: 0;
+}}
 
-.scene0-overlay {
-    position: fixed; 
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    /* 【修改】：大幅降低遮罩的黑暗度，让背后的地球亮出来！保留极轻微的扫描线 */
-    background: linear-gradient(to bottom, rgba(10, 5, 20, 0.1), rgba(0, 0, 0, 0.45)),
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 230, 118, 0.03) 2px, rgba(0, 230, 118, 0.03) 4px);
-    z-index: -1000;
-}
+/* 延迟层级同步拉长，保持错落有致的呼吸感 */
+.delay-1 {{ animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }}
+.delay-2 {{ animation-delay: 0.8s; opacity: 0; animation-fill-mode: forwards; }}
 
-@keyframes slowPan {
-    0% { transform: scale(1) translate(0, 0); }
-    /* 【修改】：加大放大倍率（1.25倍）和平移距离（-4%），增强景深漫游感 */
-    100% { transform: scale(1.25) translate(-4%, -4%); }
-}
+/* 卡片样式 */
+.glass-card {{
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px; padding: 40px; max-width: 550px; margin: 4vh auto 30px auto;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+    text-align: center; border: 1px solid rgba(255, 255, 255, 0.5);
+}}
 
-.alert-box {
-    margin-top: 5vh; text-align: center; 
-    animation: pulseAlert 2s infinite, floatDown 1s ease-out forwards;
-}
+.glass-card-wide {{
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px; padding: 30px; max-width: 950px; margin: 2vh auto 30px auto;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}}
 
-@keyframes floatDown {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.glass-card-full {{
+    background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 12px; padding: 25px 30px; margin: 0 0 20px 0; width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}}
 
-/* 首页规则终端卡片 - 保持高级毛玻璃质感 */
-.rule-card {
-    background: rgba(15, 20, 30, 0.45); 
-    backdrop-filter: blur(12px);        
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 82, 82, 0.4);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 82, 82, 0.1);
-    border-radius: 12px;
-    padding: 25px 35px;
-    margin: 20px auto;
-    max-width: 900px;
-    color: #E0E0E0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    animation: floatUp 1.2s ease-out forwards;
-    opacity: 0; 
-}
+.bulletin-board {{
+    background-color: #F8F7F2; border: 1px solid #D6D3C4; border-radius: 12px; padding: 25px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08), inset 0 0 40px rgba(139,115,85,0.02); margin-bottom: 20px;
+}}
 
-@keyframes floatUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* 字体排版 */
+.glass-card h1, .glass-card-wide h1, .glass-card-full h1 {{ font-family: 'Lora', serif; color: #111827; font-size: 38px; margin-bottom: 15px; line-height: 1.2; }}
+.glass-card h3, .glass-card-wide h3 {{ font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }}
+.glass-card p, .glass-card-wide p {{ font-family: 'Inter', sans-serif; font-size: 16px; color: #374151; line-height: 1.6; }}
 
-/* 首页规则终端卡片 */
-.rule-card {
-    background: rgba(15, 20, 30, 0.85);
-    border: 1px solid #FF5252;
-    box-shadow: 0 0 15px rgba(255, 82, 82, 0.2);
-    border-radius: 10px;
-    padding: 20px 30px;
-    margin: 20px auto;
-    max-width: 900px;
-    color: #E0E0E0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-.rule-card h4 {
-    margin-top: 10px;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
+/* 按钮样式 */
+div[data-testid="stButton"] > button {{
+    border-radius: 6px !important; padding: 6px 0 !important; font-size: 12px !important; font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important; white-space: nowrap !important; min-width: 100% !important; transition: all 0.3s ease !important;
+    border: 1px solid #D6D3C4 !important;
+}}
 
-/* === 引导小手 === */
-.pointer-hand {
-    font-size: 50px; text-align: center; opacity: 0;
-    animation: fadeInHand 0.5s forwards 0.5s, bounceHand 1s infinite alternate 0.5s;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-    margin-top: -10px; margin-bottom: 20px;
-}
-@keyframes fadeInHand { to { opacity: 1; } }
-@keyframes bounceHand { 0% { transform: translateY(15px); } 100% { transform: translateY(0px); } }
+div[data-testid="stButton"] > button[data-testid="baseButton-secondary"] {{
+    background: #FFFFFF !important; color: #44403C !important; box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}}
 
-/* 通用 UI 组件 */
-.dialogue-box {
-    position: fixed; bottom: 3%; left: 10%; width: 80%;
-    background: rgba(10, 15, 25, 0.95); border: 1px solid #444; border-radius: 8px;
-    padding: 20px 30px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-    color: #FFF; font-size: 18px; line-height: 1.5;
-}
-.content-wrapper { background: rgba(0, 0, 0, 0.85); padding: 30px; border-radius: 10px; margin-top: 30px; border: 1px solid #333; }
+div[data-testid="stButton"] > button[data-testid="baseButton-primary"] {{
+    background: #047857 !important; color: #FFFFFF !important; border-color: #047857 !important;
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3) !important;
+}}
 
-/* 科幻风数据解释框 */
-.info-box {
-    background: rgba(0, 230, 118, 0.08); border-left: 4px solid #00E676;
-    padding: 15px 25px; margin-bottom: 20px; border-radius: 0 5px 5px 0;
-    font-family: 'Courier New', Courier, monospace; color: #E0E0E0; font-size: 15px;
-}
-
-/* 结算特效：纯正金黄色辉光 */
-.golden-glow {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: radial-gradient(circle, rgba(255, 235, 59, 0.15) 0%, rgba(255, 215, 0, 0.4) 100%);
-    box-shadow: inset 0 0 150px rgba(255, 215, 0, 0.6); mix-blend-mode: color-dodge; z-index: -10; pointer-events: none;
-    animation: goldPulse 2s infinite alternate;
-}
-@keyframes goldPulse { 0% {opacity: 0.6;} 100% {opacity: 1;} }
-
-.freeze-effect {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: radial-gradient(circle, rgba(173,216,230,0.1) 0%, rgba(0,0,139,0.6) 100%);
-    box-shadow: inset 0 0 200px rgba(255,255,255,0.7); backdrop-filter: grayscale(80%) blur(1px); z-index: -10; pointer-events: none;
-}
+div[data-testid="stButton"] > button:hover {{ transform: translateY(-2px); border-color: #047857 !important; }}
 </style>
 """, unsafe_allow_html=True)
 
-if 'scene' not in st.session_state:
-    st.session_state.scene = 0 
 
+# ==========================================
+# 2. 核心全量数据
+# ==========================================
 hours_str = [f"{i:02d}:00" for i in range(24)]
 true_spreads = np.array([1.5, -1.0, 0.5, 0.0, -2.0, 3.5, 8.0, 4.0, 1.5, -3.0, 0.0, 5.0, 15.0, 80.0, 350.0, 650.0, 720.0, 580.0, 200.0, 45.0, 10.0, 2.0, -1.0, 0.5])
 ai_profit = np.sum(true_spreads[np.argsort(true_spreads)[-3:]])
+
 temps_2m = np.array([5, 3, 1, -2, -5, -8, -10, -12, -14, -15, -16, -15, -13, -11, -10, -12, -15, -18, -20, -19, -17, -15, -12, -10])
 wind_speed_10m = np.array([5, 6, 8, 10, 12, 15, 18, 20, 15, 10, 8, 5, 4, 3, 2, 2, 1, 1, 2, 3, 5, 6, 8, 10])
-wind_gusts_10m = wind_speed_10m * 1.5
 precipitation = np.array([0, 0, 0, 2, 5, 10, 15, 25, 20, 10, 5, 2, 0, 0, 0, 5, 15, 25, 10, 5, 0, 0, 0, 0])
 humidity_2m = np.array([60, 65, 70, 75, 80, 85, 90, 95, 95, 90, 85, 80, 75, 70, 75, 80, 85, 90, 95, 95, 90, 85, 80, 75])
 
 # ==========================================
-# 场景 0：全新升级的高级加载与交易指南首页 (全英文修复版)
+# Scene 0: Start
 # ==========================================
 if st.session_state.scene == 0:
-    st.markdown("<div class='scene0-bg'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='scene0-overlay'></div>", unsafe_allow_html=True)
+    render_background("bg0.png")
     st.markdown("""
-    <div class='alert-box'>
-        <h1 style='color: #FF1744; font-size: 42px; font-family: monospace;'>⚠️ WARNING: GRID EMERGENCY SIMULATION</h1>
-        <h3 style='color: #FF5252; letter-spacing: 2px;'>ERCOT North Hub Virtual Trading Terminal</h3>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="glass-card animate-fade-up">
+    <h3>The Grid Crisis Game</h3>
+    <h1>Can you predict the breaking point by tomorrow?</h1>
+    <p>See if human intuition can save your portfolio from the worst effects of an unprecedented winter storm.</p>
+</div>
+""", unsafe_allow_html=True)
     
-    # 修复了空行导致的解析bug，并全部替换为纯英文
-    st.markdown("""
-    <div class='rule-card'>
-        <h4 style='color: #00E676;'>⚡ BACKGROUND: WHAT IS VIRTUAL TRADING?</h4>
-        <p style='font-size: 14px; line-height: 1.6;'>
-            In the Texas <b>ERCOT</b> market, traders don't need physical power plants to arbitrage between the <b>Day-Ahead</b> and <b>Real-Time</b> markets:<br>
-            • <b>Mechanism:</b> Bids must be submitted before the 10:00 AM deadline the day prior.<br>
-            • <b>Settlement:</b> You buy power at the locked Day-Ahead price and sell it simultaneously at the actual Real-Time price.<br>
-            • <b>The Goal:</b> If extreme weather causes Real-Time prices to spike, you capture the massive price spread!
-        </p>
-        <h4 style='color: #00BFFF; margin-top: 15px;'>🎮 RULES & YOUR MISSION</h4>
-        <ol style='font-size: 14px; line-height: 1.6; margin-bottom: 10px; padding-left: 20px;'>
-            <li>Analyze the terminal's <b>24-hour multidimensional weather forecast</b> (Temp, Wind, Rain, Humidity).</li>
-            <li>Predict when the grid will stress the most and <b>lock in exactly 3 hours</b>.</li>
-            <li>Execute your trades and see if human intuition can beat our <b>AI Machine Learning Model</b>!</li>
-        </ol>
-        <p style='font-size: 13px; color: #FFD700; background: rgba(255, 215, 0, 0.1); padding: 8px 12px; border-radius: 5px; margin-top: 15px;'>
-            💡 <b>WHY DO WE NEED AN AI TRADING MODEL?</b><br>
-            Power prices during extreme weather are highly non-linear. Human intuition easily misjudges complex meteorological data, leading to massive losses. This simulation will show you exactly why our Machine Learning model is essential for capturing subtle patterns and maximizing returns!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns([2,1,2])
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("INITIALIZE SIMULATION", type="primary", use_container_width=True):
-            st.session_state.scene = 1
-            st.rerun()
-        st.markdown("<div class='pointer-hand'>👆</div>", unsafe_allow_html=True)
+        st.button("Start Simulation", key="btn_start", type="primary", on_click=change_scene, args=(1,), use_container_width=True)
 
 # ==========================================
-# 场景 1
+# Scene 1: The Context
 # ==========================================
 elif st.session_state.scene == 1:
-    render_background("room.jpg", zoom=False)
-    
+    render_background("bg1.png")
     st.markdown("""
-    <div class='dialogue-box'>
-        <b>[System Alert] 9:00 AM - DAY AHEAD</b><br><br>
-        A once-in-a-century winter storm is bearing down on the North Hub.<br>
-        You need to review the <b>multi-dimensional weather forecast</b> and place Day-Ahead Virtual Bids.
+<div class="glass-card animate-fade-up" style="text-align: left;">
+    <h3>Round 1 of 3 • The Briefing</h3>
+    <h1 style="font-size: 30px;">A polar vortex is descending upon Texas.</h1>
+    <p><strong>Date: Feb 13, 2021.</strong> Meteorologists have just issued a dire warning. The storm threatens to freeze natural gas wellheads and ice over wind turbines.</p>
+    <p>As an energy trader, you participate in <strong>Virtual Trading</strong>. You must buy power in the Day-Ahead market and sell it in Real-Time.</p>
+    <div class="animate-fade-up delay-1" style="background: rgba(4, 120, 87, 0.1); padding: 15px; border-left: 4px solid #047857; border-radius: 4px; margin-top: 20px;">
+        <p style="margin:0; font-size: 14px; font-weight: 600;">Your Goal: Analyze the weather data on the next page and select exactly 3 hours to deploy your capital.</p>
     </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
     
-    st.markdown("<div style='margin-top: 5vh;'></div>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1,1,1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-         if st.button("Access Weather & Trading Terminal 💻", use_container_width=True):
-             st.session_state.scene = 2
-             st.rerun()
-         st.markdown("<div class='pointer-hand'>👆</div>", unsafe_allow_html=True)
+        st.button("Analyze Weather Data", key="btn_analyze", type="primary", on_click=change_scene, args=(2,), use_container_width=True)
 
 # ==========================================
-# 场景 2：天气分析与交易执行终端
+# Scene 2: The Data Analysis & Execution
 # ==========================================
 elif st.session_state.scene == 2:
-    # 确保初始化选中时间的列表
-    if 'selected_hours' not in st.session_state:
-        st.session_state.selected_hours = []
-
-    render_background("room.jpg", zoom=True)
-    st.markdown("<div class='content-wrapper'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color: #00BFFF; text-align: center; margin-bottom: 20px;'>ERCOT ADVANCED METEOROLOGICAL TERMINAL (FEB 13)</h3>", unsafe_allow_html=True)
-    
+    render_background("bg2.png")
     st.markdown("""
-    <div class='info-box'>
-        <b>💡 SYSTEM GUIDE: How Weather Impacts Grid Prices</b><br>
-        • <b>Temperature 🌡️:</b> Deep freezes spike heating demand and can freeze natural gas pipelines (low supply, high demand).<br>
-        • <b>Wind 💨:</b> Normally produces cheap energy, but extreme ice storms can freeze wind turbines, crashing the power supply.<br>
-        • <b>Precipitation ❄️:</b> Freezing rain and snow cover solar panels and weigh down power lines, causing local outages.<br>
-        • <b>Humidity 💧:</b> High humidity accelerates dangerous ice formation on grid infrastructure.
-    </div>
-    """, unsafe_allow_html=True)
+<div class="glass-card-wide animate-fade-up">
+    <h3 style="text-align: center;">Round 2 of 3 • Market Execution</h3>
+    <h1 style="font-size: 26px; text-align: center; margin-bottom: 25px;">Meteorological Forecast Dashboard</h1>
+    <div class="bulletin-board animate-fade-up delay-1" style="padding: 20px 25px;">
+        <div style="background: rgba(255, 255, 255, 0.95); border-left: 4px solid #047857; padding: 12px 18px; margin-bottom: 15px; border-radius: 6px; text-align: left;">
+            <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #047857;">💡 SYSTEM GUIDE: How Weather Impacts Grid Prices</p>
+            <p style="margin: 0; font-size: 12px; color: #44403C; line-height: 1.5;">
+                • <b>Temp 🌡️:</b> Deep freezes spike heating demand & freeze natural gas pipelines.<br>
+                • <b>Wind 💨:</b> Extreme ice storms can freeze turbine blades, crashing power supply.<br>
+                • <b>Precipitation ❄️:</b> Freezing rain & snow weigh down power lines & cover solar panels.<br>
+                • <b>Humidity 💧:</b> High humidity accelerates dangerous ice formation on grid infrastructure.
+            </p>
+        </div>
+""", unsafe_allow_html=True)
     
-    # 任务提示框
-    st.markdown("""
-    <div style='background: rgba(255, 215, 0, 0.15); border-left: 4px solid #FFD700; padding: 15px 25px; margin-bottom: 20px; border-radius: 0 5px 5px 0;'>
-        <h4 style='color: #FFD700; margin: 0 0 10px 0; font-family: monospace;'>⚡ MISSION: PREDICT THE PRICE SPIKE</h4>
-        <p style='color: #E0E0E0; margin: 0; font-size: 15px;'>
-            Your goal is to find the breaking points of the grid. <br>
-            <b>👉 ACTION: Click the hour buttons on the timeline below</b> to lock in exactly <b>3 hours</b> where you predict electricity prices will <b>SKYROCKET!</b>
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # 绘制气象图表（去掉之前的点击交互，恢复纯展示模式）
-    # 绘制气象图表
+    board_bg_color = '#F8F7F2'
     fig_weather = make_subplots(specs=[[{"secondary_y": True}]])
     
-    # 温度线：保持原样（原本的亮蓝色比较清晰）
-    fig_weather.add_trace(go.Scatter(x=hours_str, y=temps_2m, mode='lines+markers', name='Temp 2m (°C)', line=dict(color='#00BFFF', width=3)), secondary_y=False)
-    
-    # 🌟 修改 1：加粗湿度线，提高不透明度至 0.8，改为更显眼的虚线
-    fig_weather.add_trace(go.Scatter(x=hours_str, y=humidity_2m, mode='lines', name='Rel. Humidity (%)', line=dict(color='rgba(255,255,255,0.8)', width=2, dash='dash')), secondary_y=False)
-    
-    # 🌟 修改 2：将降水柱状图改为带点蓝调的半透明色，提高辨识度
-    fig_weather.add_trace(go.Bar(x=hours_str, y=precipitation, name='Precipitation (mm)', marker_color='rgba(135, 206, 250, 0.4)'), secondary_y=True)
-    
-    # 风速线：保持原样
-    fig_weather.add_trace(go.Scatter(x=hours_str, y=wind_speed_10m, mode='lines', name='Wind Spd (m/s)', line=dict(color='#FFA500', width=2)), secondary_y=True)
+    fig_weather.add_trace(go.Scatter(x=hours_str, y=temps_2m, mode='lines+markers', name='Temp (°C)', line=dict(color='#B91C1C', width=3)), secondary_y=False)
+    fig_weather.add_trace(go.Scatter(x=hours_str, y=humidity_2m, mode='lines', name='Humidity (%)', line=dict(color='#475569', width=2, dash='dot')), secondary_y=False)
+    fig_weather.add_trace(go.Bar(x=hours_str, y=precipitation, name='Precip (mm)', marker_color='rgba(56, 189, 248, 0.35)'), secondary_y=True)
+    fig_weather.add_trace(go.Scatter(x=hours_str, y=wind_speed_10m, mode='lines', name='Wind (m/s)', line=dict(color='#047857', width=3)), secondary_y=True)
     
     fig_weather.update_layout(
-        template="plotly_dark", 
-        # 🌟 修改 3：给图表增加一个深色半透明背景，隔绝背后的杂乱图片
-        plot_bgcolor='rgba(15, 20, 30, 0.75)', 
-        paper_bgcolor='rgba(15, 20, 30, 0.75)', 
-        height=350, 
-        margin=dict(t=10, b=10, l=10, r=10), 
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        # 🌟 修改 4：强制图表内部的所有坐标系和图例文字为纯白色，略微放大
-        font=dict(color="#FFFFFF", size=13)
+        template="plotly_white", height=300, margin=dict(t=10, b=10, l=45, r=45), 
+        plot_bgcolor=board_bg_color, paper_bgcolor=board_bg_color,
+        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1),
+        font=dict(family="Inter", color="#292524", size=11),
+        xaxis=dict(showgrid=True, gridcolor='#E7E5E4'),
+        yaxis=dict(showgrid=True, gridcolor='#E7E5E4', title="Temp (°C) / Humidity (%)"),
+        yaxis2=dict(showgrid=False, title="Wind (m/s) / Precip (mm)")
     )
     st.plotly_chart(fig_weather, use_container_width=True)
     
-    # ==========================================
-    # 🌟 全新设计的底部交互式时间轴按钮组
-    # ==========================================
-    st.markdown(f"<h4 style='color: #DDD; text-align: center; margin-top: 10px;'>TARGET HOURS SELECTED: {len(st.session_state.selected_hours)} / 3</h4>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style="border-top: 1px dashed #D6D3C4; margin-top: 10px; padding-top: 10px;">
+            <p style='text-align: center; font-weight: 700; color: #44403C; margin-bottom: 12px;'>
+                Select 3 Target Hours: <span style='color:#047857;'>{len(st.session_state.selected_hours)} / 3</span>
+            </p>
+        </div>
+""", unsafe_allow_html=True)
     
-    # 使用 24 列来平均分配按钮，模拟 X 轴
     cols = st.columns(24)
     for i, hour in enumerate(hours_str):
-        is_selected = hour in st.session_state.selected_hours
-        
-        # 根据选中状态改变按钮颜色 (primary = 红色/高亮, secondary = 默认灰色)
-        btn_type = "primary" if is_selected else "secondary"
-        
         with cols[i]:
-            # 为了在一排显示下，按钮文字缩简为小时数，如 "00", "01"
-            display_hour = f"{i:02d}" 
-            if st.button(display_hour, key=f"btn_{hour}", type=btn_type, use_container_width=True):
-                # 切换选中状态逻辑
-                if is_selected:
-                    st.session_state.selected_hours.remove(hour)
-                    st.rerun()
-                else:
-                    if len(st.session_state.selected_hours) < 3:
-                        st.session_state.selected_hours.append(hour)
-                        st.rerun()
-                    else:
-                        st.toast("⚠️ Maximum 3 hours reached! Please deselect one first.")
+            btn_type = "primary" if hour in st.session_state.selected_hours else "secondary"
+            st.button(f"{i:02d}", key=f"btn_{hour}", type=btn_type, on_click=toggle_hour, args=(hour,))
+            
+    st.markdown("""
+    </div>
+</div>
+""", unsafe_allow_html=True) 
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # ==========================================
-    # 🌟 选满 3 个后自动弹出执行面板
-    # ==========================================
     if len(st.session_state.selected_hours) == 3:
-        st.success("✅ Targets Locked. Ready for execution.")
-        col1, col2, col3 = st.columns([1,2,1])
+        col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            if st.button("EXECUTE BIDS", type="primary", use_container_width=True):
-                # 记录玩家选择的下标和利润，用于结算界面
-                st.session_state.user_picks_idx = [hours_str.index(h) for h in st.session_state.selected_hours]
-                st.session_state.user_profit = sum([true_spreads[i] for i in st.session_state.user_picks_idx])
-                st.session_state.scene = 3
-                st.rerun()
-            st.markdown("<div class='pointer-hand'>👆</div>", unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+            st.button("Lock Trades & Settle Market", key="btn_settle", type="primary", on_click=settle_market, use_container_width=True)
+            
 # ==========================================
-# 场景 3
+# Scene 3: The Detailed Settlement
 # ==========================================
 elif st.session_state.scene == 3:
-    render_background("snow.jpg", dark=True)
+    render_background("bg3.png")
     is_win = st.session_state.user_profit >= (ai_profit * 0.7)
+    board_bg_color = '#F8F7F2'
+    
+    st.markdown("""
+<div class="glass-card-full animate-fade-up">
+    <div style="border-bottom: 2px solid #111827; padding-bottom: 10px;">
+        <h1 style="font-size: 28px; margin: 0; text-align: left;">Summary: Market Settlement</h1>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+    
+    col_chart, col_stats = st.columns([2, 1])
+    
+    with col_chart:
+        st.markdown("""
+    <div class="bulletin-board animate-fade-up delay-1" style="padding: 20px; margin-bottom: 0;">
+        <p style='font-weight: 700; color: #292524; margin-bottom: 5px;'>Actual Market Spread ($/MWh)</p>
+""", unsafe_allow_html=True)
+        
+        fig_res = go.Figure()
+        fig_res.add_trace(go.Bar(x=hours_str, y=true_spreads, name='Spread', marker_color='#D6D3C4'))
+        
+        user_y = [true_spreads[i] for i in st.session_state.user_picks_idx]
+        user_x = [hours_str[i] for i in st.session_state.user_picks_idx]
+        fig_res.add_trace(go.Scatter(x=user_x, y=user_y, mode='markers', name='Your Trades', marker=dict(color='#B91C1C', size=16, symbol='x')))
+        
+        ai_picks_idx = np.argsort(true_spreads)[-3:]
+        ai_y = [true_spreads[i] for i in ai_picks_idx]
+        ai_x = [hours_str[i] for i in ai_picks_idx]
+        fig_res.add_trace(go.Scatter(x=ai_x, y=ai_y, mode='markers', name='AI Model', marker=dict(color='#047857', size=14)))
+        
+        fig_res.update_layout(
+            template="plotly_white", height=300, margin=dict(t=0, b=0, l=0, r=0), 
+            plot_bgcolor=board_bg_color, paper_bgcolor=board_bg_color,
+            legend=dict(orientation="h", y=1.1, font=dict(color="#292524", weight="bold"))
+        )
+        st.plotly_chart(fig_res, use_container_width=True)
+        st.markdown("""
+    </div>
+""", unsafe_allow_html=True)
 
-    if is_win:
-        falling_coins_effect() 
-        st.markdown("<div class='golden-glow'></div>", unsafe_allow_html=True) 
-    else:
-        st.snow() 
-        st.markdown("<div class='freeze-effect'></div>", unsafe_allow_html=True) 
-    
-    st.markdown("<div class='content-wrapper'>", unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: center; color: white;'>MARKET SETTLEMENT REPORT</h2>", unsafe_allow_html=True)
-    
-    score_col1, score_col2 = st.columns(2)
-    with score_col1:
-        color = "#00E676" if is_win else "#FF5252"
-        st.markdown(f"<h3 style='color: {color};'>👤 Human Trader: ${st.session_state.user_profit:.2f}</h3>", unsafe_allow_html=True)
-    with score_col2:
-        st.markdown(f"<h3 style='color: #FFD700;'>🤖 AI Model (Simulation): ${ai_profit:.2f}</h3>", unsafe_allow_html=True)
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=hours_str, y=true_spreads, mode='lines', name='Actual Spread', line=dict(color='rgba(255,255,255,0.7)', width=2)))
-    fig.add_trace(go.Scatter(
-        x=[hours_str[i] for i in st.session_state.user_picks_idx],
-        y=[true_spreads[i] for i in st.session_state.user_picks_idx],
-        mode='markers', name='Your Trades', marker=dict(color='#FF5252', size=16, symbol='cross')
-    ))
-    ai_picks_idx = np.argsort(true_spreads)[-3:]
-    fig.add_trace(go.Scatter(
-        x=[hours_str[i] for i in ai_picks_idx],
-        y=[true_spreads[i] for i in ai_picks_idx],
-        mode='markers', name='AI Trades', marker=dict(color='#FFD700', size=18, symbol='star', line=dict(color='white', width=1))
-    ))
-    fig.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=300, margin=dict(t=10, b=10, l=10, r=10))
-    st.plotly_chart(fig, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 180px; width: 100%;'></div>", unsafe_allow_html=True)
-    
-    dialogue_text = (
-        "<b>[Victory]</b> Incredible intuition! You successfully navigated the chaos today. But human intuition doesn't scale, and fatigue makes us prone to errors. <br><br><b>How do we automate this success and execute it with mathematical precision every single day? Let us show you our real Machine Learning Model...</b>" 
-        if is_win else 
-        "<b>[System Failure]</b> Your intuition was overwhelmed by the complexity of the data. This is exactly the limitation of human trading during extreme events.<br><br><b>But don't worry, this is exactly why we built our solution. Are you ready to see how our real Machine Learning Model solves this? Let's dive in...</b>"
-    )
-    
-    st.markdown(f"<div class='dialogue-box'>{dialogue_text}</div>", unsafe_allow_html=True)
-    
-    st.markdown("<div style='position: fixed; bottom: 4%; right: 2%; z-index: 100;'>", unsafe_allow_html=True)
-    if st.button("REBOOT GAME"):
-        st.session_state.scene = 0
-        st.rerun()
-    st.markdown("<div class='pointer-hand' style='font-size: 30px;'>👆</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    with col_stats:
+        st.markdown(f"""
+    <div class="bulletin-board animate-fade-up delay-1" style="padding: 20px; margin-bottom: 15px;">
+        <p style="font-size: 13px; font-weight: 800; color: #57534E; text-transform: uppercase; margin: 0;">Human Trader PnL</p>
+        <h2 style="font-family: 'Lora', serif; font-size: 38px; color: {'#047857' if is_win else '#B91C1C'}; margin: 5px 0;">${st.session_state.user_profit:.2f}</h2>
+    </div>
+    <div class="bulletin-board animate-fade-up delay-2" style="padding: 20px; margin-bottom: 25px;">
+        <p style="font-size: 13px; font-weight: 800; color: #57534E; text-transform: uppercase; margin: 0;">GridWise AI PnL</p>
+        <h2 style="font-family: 'Lora', serif; font-size: 38px; color: #1C1917; margin: 5px 0;">${ai_profit:.2f}</h2>
+    </div>
+""", unsafe_allow_html=True)
+        
+        st.button("Restart Simulation", key="btn_restart", type="primary", on_click=restart_game, use_container_width=True)
+
+    st.markdown("""
+<div class="glass-card-full animate-fade-up delay-2" style="display: flex; gap: 20px; padding: 25px; margin-top: 25px; text-align: left;">
+    <div style="flex: 1;">
+        <p style="font-weight: 800; font-size: 15px; margin-bottom: 8px; color: #047857;">✅ AI Attribution</p>
+        <p style="font-size: 14px; color: #44403C; margin: 0; line-height: 1.6;">Our model detected a subtle non-linear collapse in wind generation precisely when evening heating demand spiked, locking in peak profitability.</p>
+    </div>
+    <div style="flex: 1;">
+        <p style="font-weight: 800; font-size: 15px; margin-bottom: 8px; color: #D97706;">⚠️ Alpha Tracker</p>
+        <p style="font-size: 14px; color: #44403C; margin: 0; line-height: 1.6;">Human intuition struggles to process multidimensional arrays simultaneously. Quantitative models scale this flawlessly across massive datasets.</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
