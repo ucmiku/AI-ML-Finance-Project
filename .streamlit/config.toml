@@ -1,7 +1,13 @@
 [theme]
-base="light"
-primaryColor="#059669"   # 使用深翡翠绿作为主按钮色
-backgroundColor="#F5F7FA" # 柔和的浅灰背景
-secondaryBackgroundColor="#FFFFFF" # 卡片和侧边栏的白底
-textColor="#1E293B"       # 深炭黑文字
-font="sans serif"
+# 主题色（Logo 中的青绿色）：影响按钮、滑块、选中状态、加载条等
+primaryColor = "#10B981" 
+
+# 背景色：整个应用的最底层背景（浅灰色，让内容区显得突出）
+backgroundColor = "#F4F5F7" 
+
+# 次要背景色：侧边栏和交互组件的底色（纯白）
+secondaryBackgroundColor = "#FFFFFF" 
+
+# 文本与字体
+textColor = "#1E293B"
+font = "sans serif"

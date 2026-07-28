@@ -15,6 +15,31 @@ def inject_custom_css():
     st.markdown("""
         <style>
         /* ==========================================
+           1. 压缩主页面顶部和两侧的默认留白
+           ========================================== */
+        .block-container {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
+        }
+
+        /* 隐藏右上角默认的 Deploy 按钮和汉堡菜单（让界面更像独立产品）*/
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
+
+        /* ==========================================
+           2. 优化带边框容器 st.container(border=True) 呈现悬浮卡片质感
+           ========================================== */
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #FFFFFF !important;
+            border: 1px solid #E5E7EB !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            padding: 0.5rem !important; 
+        }
+        /* ==========================================
            1. 字体与全局背景
            ========================================== */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -224,6 +249,43 @@ def inject_custom_css():
 
         [data-testid="stMain"] [data-testid="stVerticalBlock"] > div:nth-child(3n + 3) {
             animation-name: terminalLoadRight;
+        }
+        /* ==========================================
+           6. 全局留白压缩与 Tabs 选项卡优化
+           ========================================== */
+        /* 压缩主页面顶部巨大的默认留白 */
+        .block-container {
+            padding-top: 3rem !important;
+            padding-bottom: 2rem !important;
+        }
+
+        /* 优化 Tabs 的视觉，增加底部边框作为轨道，拉开间距 */
+        [data-baseweb="tab-list"] {
+            gap: 32px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        [data-baseweb="tab"] {
+            padding-bottom: 12px !important;
+            font-size: 16.5px !important;
+            font-weight: 600 !important;
+        }
+
+        /* ==========================================
+           7. 赋予 st.container(border=True) 悬浮卡片质感
+           ========================================== */
+        /* 拦截 Streamlit 原生边框容器，强制赋予纯白背景和阴影 */
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            background-color: #FFFFFF !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+            padding: 0.5rem !important; /* 内部增加呼吸感 */
+            transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+        }
+        
+        [data-testid="stVerticalBlockBorderWrapper"]:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+            border-color: #CBD5E1 !important;
         }
         </style>
     """, unsafe_allow_html=True)
