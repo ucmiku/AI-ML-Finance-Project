@@ -1,0 +1,142 @@
+{
+  "file": "predictions/c1_2025_oof_predictions.csv",
+  "rows_expected": 8760,
+  "primary_key": "delivery_hour_utc",
+  "field_schema": [
+    {
+      "field": "delivery_hour_utc",
+      "dtype": "object"
+    },
+    {
+      "field": "delivery_date_local",
+      "dtype": "object"
+    },
+    {
+      "field": "fold_id",
+      "dtype": "object"
+    },
+    {
+      "field": "prediction_period",
+      "dtype": "object"
+    },
+    {
+      "field": "model_name",
+      "dtype": "object"
+    },
+    {
+      "field": "model_version",
+      "dtype": "object"
+    },
+    {
+      "field": "run_id",
+      "dtype": "object"
+    },
+    {
+      "field": "regression_head",
+      "dtype": "object"
+    },
+    {
+      "field": "classification_head",
+      "dtype": "object"
+    },
+    {
+      "field": "predicted_spread",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_c1",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_c2",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_c3",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_c4",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_c5",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_negative",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_neutral",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_positive",
+      "dtype": "float64"
+    },
+    {
+      "field": "p_outer",
+      "dtype": "float64"
+    },
+    {
+      "field": "predicted_class",
+      "dtype": "int64"
+    },
+    {
+      "field": "confidence",
+      "dtype": "float64"
+    },
+    {
+      "field": "signal_base",
+      "dtype": "int64"
+    },
+    {
+      "field": "recommended_action_base",
+      "dtype": "object"
+    },
+    {
+      "field": "actual_class",
+      "dtype": "int64"
+    },
+    {
+      "field": "actual_spread",
+      "dtype": "float64"
+    },
+    {
+      "field": "fixed_extreme_weather_flag",
+      "dtype": "int64"
+    },
+    {
+      "field": "target_extreme20",
+      "dtype": "int64"
+    },
+    {
+      "field": "net_pnl",
+      "dtype": "float64"
+    },
+    {
+      "field": "signal",
+      "dtype": "int64"
+    }
+  ],
+  "required_fields": [
+    "delivery_hour_utc",
+    "actual_spread",
+    "predicted_spread",
+    "p_c1",
+    "p_c2",
+    "p_c3",
+    "p_c4",
+    "p_c5",
+    "p_negative",
+    "p_neutral",
+    "p_positive",
+    "predicted_class",
+    "confidence",
+    "signal",
+    "fold_id",
+    "model_version"
+  ],
+  "notes": "OOF table covers ERCOT local 2025 delivery year; final UTC timestamp appears as 2026-01-01 05:00:00+00:00 because of local-to-UTC conversion."
+}

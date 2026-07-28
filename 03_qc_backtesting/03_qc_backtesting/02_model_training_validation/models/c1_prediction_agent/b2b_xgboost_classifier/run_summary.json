@@ -1,0 +1,37 @@
+{
+  "status": "COMPLETED",
+  "run_id": "B2_classifier_5_20_formal_v3r1_f5730506",
+  "best_params": {
+    "n_estimators": 845,
+    "learning_rate": 0.011193461675641564,
+    "max_depth": 7,
+    "min_child_weight": 6.656181971152102,
+    "subsample": 0.7840143094662299,
+    "colsample_bytree": 0.6541471483631235,
+    "reg_alpha": 0.00032641097978613017,
+    "reg_lambda": 0.9535400963356232,
+    "random_state": 20260722,
+    "n_jobs": 2,
+    "tree_method": "hist",
+    "early_stopping_rounds": 50,
+    "objective": "multi:softprob",
+    "num_class": 5,
+    "eval_metric": "mlogloss"
+  },
+  "aggregate_metrics": {
+    "accuracy": 0.46624890192716073,
+    "macro_f1": 0.3499113768480154,
+    "weighted_f1": 0.4680383442798564,
+    "balanced_accuracy": 0.3588954387764583,
+    "log_loss": 1.2290621565585382,
+    "multiclass_brier": 0.12957602464946807,
+    "mean_class_distance": 0.7754898251170408,
+    "spearman_correlation": 0.15533719700092374,
+    "c1_pr_auc": 0.3493721183138683,
+    "c5_pr_auc": 0.13541876559084357,
+    "prediction_seconds": 38.438786833333324,
+    "train_rows": 11039.333333333334,
+    "validation_rows": 2920.0,
+    "best_iteration": 728.6666666666666
+  }
+}
