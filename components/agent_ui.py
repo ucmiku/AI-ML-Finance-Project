@@ -1,10 +1,8 @@
 import streamlit as st
 import pickle
 import os
-import requests
-import json
+from rag_backend import get_sql_agent_response
 
-FASTAPI_AGENT_URL = "https://ai-ml-finance-project.onrender.com/v1/agent/ask"
 HISTORY_CACHE_FILE = "agent_memory.pkl"
 
 def load_memory():
@@ -34,15 +32,15 @@ def handle_agent_submit():
 def render_global_copilot():
     """将 RAG 智能体完美嵌入侧边栏，并默认展开"""
     
-    with st.expander("💬 GridWise AI Copilot (DeepSeek)", expanded=True):
+    with st.expander("GridWise AI Copilot (DeepSeek)", expanded=True):
         st.caption("Powered by LangChain Multi-Tool Agent")
         
         api_key = st.session_state.get('api_key', None)
         if not api_key:
-            st.warning("⚠️ Enter DeepSeek API Key in Global Settings first.")
+            st.warning("Enter DeepSeek API Key in Global Settings first.")
             return
 
-        if st.button("🧹 Clear Chat History", key="clear_chat_sidebar"):
+        if st.button("Clear Chat History", key="clear_chat_sidebar"):
             st.session_state.chat_history = []
             if os.path.exists(HISTORY_CACHE_FILE):
                 os.remove(HISTORY_CACHE_FILE)
@@ -68,26 +66,18 @@ def render_global_copilot():
                 with st.chat_message("assistant"):
                     with st.spinner("🤖 Analyzing Database & Live Context..."):
                         try:
-                            # 获取当前页面的预测上下文 (如果是空说明用户还没看预测页面)
+                            # 获取当前页面的预测上下文
                             live_context = st.session_state.get("current_prediction_context", "No real-time prediction data is currently viewed by the user.")
                             
-                            payload = {
-                                "question": query, 
-                                "api_key": api_key,
-                                "dashboard_context": live_context # 喂给大模型的“页面正在展示的内容”
-                            }
+                            # 🌟 组合问题，直接传给你本地的 get_sql_agent_response 函数
+                            full_query = f"Context: {live_context}\n\nQuestion: {query}"
                             
-                            response = requests.post(FASTAPI_AGENT_URL, json=payload, timeout=60)
-                            if response.status_code == 200:
-                                ai_response = response.json().get("answer", "No response.")
-                            else:
-                                ai_response = f"⚠️ Error {response.status_code}: {response.text}"
+                            # 直接调用本地方法，绕过 Render 服务器！
+                            ai_response = get_sql_agent_response(user_question=full_query, api_key=api_key)
 
-                            # ✅ 修复：使用正确的变量名 ai_response
                             clean_response = ai_response.replace("*", "")
                             st.markdown(clean_response)
 
-                            # ✅ 建议：将清理后的 clean_response 存入历史记录，而不是带星号的
                             st.session_state.chat_history.append({"role": "assistant", "content": clean_response})
                             save_memory(st.session_state.chat_history)
                         except Exception as e:

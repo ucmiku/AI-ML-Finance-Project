@@ -9,7 +9,7 @@ def get_sql_agent_response(user_question, api_key, db_path="sqlite:///01_data_co
     db = SQLDatabase.from_uri(db_path)
     
     llm = ChatOpenAI(
-        model_name="deepseek-v4-flash",  # 明确使用 model_name
+        model="deepseek-v4-flash",  # 明确使用 model_name
         api_key=api_key, 
         base_url="https://api.deepseek.com/v1", # 加上 /v1
         temperature=0
