@@ -90,7 +90,7 @@ with st.sidebar:
         
         api_key = st.text_input(
             "DeepSeek API Key:", 
-            value="sk-8080fcbf46f3459895cd3f8daed48535", 
+            value="", 
             type="password",                            
             help="Required for Agent and Strategy Generation"
         )
