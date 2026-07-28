@@ -33,6 +33,25 @@ run_baseline_comparison.py
 data/
 trading_handoff_C1_v3/
 
-# Archives
+# Archives & presentations (not code)
 *.zip
 *.rar
+*.pptx
+
+# Cloned repos (other team members')
+AI-ML-Finance-Project-*/
+
+# Development sandboxes (not deliverables)
+bk_testing/
+backtest_result/
+score_result/
+gemini/
+
+# Derived / temp
+_extracted/
+delivery_to_D/
+outputs/
+docs/
+key.txt
+update_module4.py
+pre/
