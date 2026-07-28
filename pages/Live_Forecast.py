@@ -10,7 +10,7 @@ from integration.streamlit_embed import render_ercot_map_workbench
 import base64
 import os
 from components.theme import inject_custom_css, render_sidebar_logo
-from streamlit_option_menu import option_menu
+
 
 # --- 0. Basic Configuration ---
 today = date.today()
@@ -30,68 +30,50 @@ elif 'logged_in' not in st.session_state:
     st.session_state['logged_in'] = False
 
 # --- 1. Sidebar & Header ---
+# ==========================================
+# :material/star: 2. 侧边栏 Logo 渲染（带有毛玻璃遮罩 + 彻底解决文字缺失）
+# ==========================================
 with st.sidebar:
     render_sidebar_logo()
-    st.markdown("---")
     
-    # 使用与 Home 一致的 Option Menu，注意这里的 default_index=1 (代表第二个菜单项)
-    selected_page = option_menu(
-        menu_title=None, 
-        options=["Terminal Home", "Live Forecast", "Model Metrics"],
-        icons=["house", "graph-up", "bar-chart-line"], 
-        default_index=1, 
-        styles={
-            "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#64748B", "font-size": "16px"},
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"4px 0"},
-            "nav-link-selected": {"background-color": "#10B981", "color": "white", "icon-color": "white"},
-        }
-    )
-    
-    # 路由跳转
-    if selected_page == "Terminal Home":
-        st.switch_page("Home.py")
-    elif selected_page == "Model Metrics":
-        st.switch_page("pages/Model_Metrics.py")
-        
+    st.page_link("Home.py", label="Terminal Home", icon=":material/dashboard:")
+    st.page_link("pages/Live_Forecast.py", label="Live Forecast", icon=":material/show_chart:")
+    st.page_link("pages/Model_Metrics.py", label="Model Metrics", icon=":material/analytics:")
     st.markdown("---")
 
-    # 【新改动】：把日期选择器用卡片包起来
-    with st.container(border=True):
-        st.markdown("### :material/timer: Live Operations")
-        selected_date = st.date_input(
-            "Select Target Date", 
-            value=tomorrow, 
-            min_value=date(2024, 1, 20)
-        )
-        
+    st.markdown("### :material/timer: Live Operations")
+    selected_date = st.sidebar.date_input(
+        "Select Target Date", 
+        value=tomorrow, 
+        min_value=date(2024, 1, 20)
+    )
     st.markdown("---")
+
     st.markdown("Copilot Access")
+    st.markdown("Interact with the quantitative RAG engine anytime.")
     render_global_copilot()
-    
-    # 【新改动】：把用户状态也包在底部的独立卡片里
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.container(border=True):
-        if st.session_state['logged_in']:
-            st.markdown("""
-                <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                        <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
-                    </div>
-                    <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
+    st.markdown("---")
+    # 左下角用户状态
+    if st.session_state['logged_in']:
+        st.markdown("""
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
                 </div>
-            """, unsafe_allow_html=True)
-            if st.button("Sign Out", use_container_width=True):
-                st.session_state['logged_in'] = False
-                if "token" in st.query_params:
-                    del st.query_params["token"]
-                st.rerun()
-        else:
-            st.markdown("<p style='color: #64748B; font-size: 14px; margin-bottom: 10px; font-weight: 500;'>Not logged in</p>", unsafe_allow_html=True)
-            if st.button("Sign In", use_container_width=True):
-                st.session_state['logged_in'] = True
-                st.query_params["token"] = "valid"
-                st.rerun()
+                <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Sign Out", use_container_width=True):
+            st.session_state['logged_in'] = False
+            if "token" in st.query_params:
+                del st.query_params["token"]
+            st.rerun()
+    else:
+        st.markdown("<p style='color: #64748B; font-size: 14px; margin-bottom: 10px; font-weight: 500;'>Not logged in</p>", unsafe_allow_html=True)
+        if st.button("Sign In", use_container_width=True):
+            st.session_state['logged_in'] = True
+            st.query_params["token"] = "valid"
+            st.rerun()
 
 st.markdown("""
     <h2 style='display: flex; align-items: center'>

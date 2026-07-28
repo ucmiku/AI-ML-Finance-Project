@@ -14,31 +14,7 @@ def inject_custom_css():
     """全局注入 Mercury 风格高科技浅色 CSS 主题"""
     st.markdown("""
         <style>
-        /* ==========================================
-           1. 压缩主页面顶部和两侧的默认留白
-           ========================================== */
-        .block-container {
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
-            padding-left: 3rem !important;
-            padding-right: 3rem !important;
-        }
-
-        /* 隐藏右上角默认的 Deploy 按钮和汉堡菜单（让界面更像独立产品）*/
-        #MainMenu {visibility: hidden;}
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
-
-        /* ==========================================
-           2. 优化带边框容器 st.container(border=True) 呈现悬浮卡片质感
-           ========================================== */
-        [data-testid="stVerticalBlockBorderWrapper"] {
-            background-color: #FFFFFF !important;
-            border: 1px solid #E5E7EB !important;
-            border-radius: 12px !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-            padding: 0.5rem !important; 
-        }
+        
         /* ==========================================
            1. 字体与全局背景
            ========================================== */

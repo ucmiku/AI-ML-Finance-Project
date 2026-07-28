@@ -8,7 +8,7 @@ from components.theme import inject_custom_css, render_sidebar_logo
 # 1. 在顶部导入部分，加上忽略警告的代码，防止控制台刷屏
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-from streamlit_option_menu import option_menu
+
 
 # 1. 页面配置
 st.set_page_config(
@@ -69,49 +69,44 @@ st.markdown("---")
 # ==========================================
 with st.sidebar:
     render_sidebar_logo()
+    
     st.markdown("---")
-    
-    # 替换原本的 st.page_link
-    selected_page = option_menu(
-        menu_title=None, 
-        options=["Terminal Home", "Live Forecast", "Model Metrics"],
-        icons=["house", "graph-up", "bar-chart-line"], # 使用 Bootstrap 图标
-        default_index=0,
-        styles={
-            "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#64748B", "font-size": "16px"},
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"4px 0"},
-            "nav-link-selected": {"background-color": "#10B981", "color": "white", "icon-color": "white"},
-        }
-    )
-    
-    # 根据选择跳转页面
-    if selected_page == "Live Forecast":
-        st.switch_page("pages/Live_Forecast.py")
-    elif selected_page == "Model Metrics":
-        st.switch_page("pages/Model_Metrics.py")
+    st.page_link("Home.py", label="Terminal Home", icon=":material/dashboard:")
+    st.page_link("pages/Live_Forecast.py", label="Live Forecast", icon=":material/show_chart:")
+    st.page_link("pages/Model_Metrics.py", label="Model Metrics", icon=":material/analytics:")
+    st.markdown("---")
         
-    st.markdown("---")
-    
     st.markdown("Copilot Access")
+    st.markdown("Interact with the quantitative RAG engine anytime.")
     render_global_copilot()
     
-    # 【改动】：将全局设置用容器包裹，形成侧边栏卡片
-    # 【改动】：将全局设置用容器包裹，并填入默认 API Key
     with st.container(border=True):
         st.markdown("""
-            <h3 style='display: flex; align-items: center; font-size: 16px; margin-top:0;'>
-                <img src="https://api.iconify.design/icon-park-outline/config.svg?color=%2310B981" width="20" style="margin-right: 8px;"> 
+            <h3 style='display: flex; align-items: center; font-size: 16px; margin-top: 0px;'>
+                <img src="https://api.iconify.design/icon-park-outline/config.svg?color=%2322AF88" width="24" style="margin-right: 8px;"> 
                 Global Settings
             </h3>
         """, unsafe_allow_html=True)
         
-        # 填上默认 Key，并且即使用户不输入也会保存到 session_state
-        api_key = st.text_input("DeepSeek API Key:", value="sk-8080fcbf46f3459895cd3f8daed48535", type="password")
-        st.session_state['api_key'] = api_key
+        api_key = st.text_input(
+            "DeepSeek API Key:", 
+            value="sk-8080fcbf46f3459895cd3f8daed48535", 
+            type="password",                            
+            help="Required for Agent and Strategy Generation"
+        )
+        if api_key:
+            st.session_state['api_key'] = api_key
+            
+        news_api_key = st.text_input(
+            "NewsAPI Key:", 
+            value="19f00766ce7840209e29c52b905e166c", 
+            type="password",                            
+            help="Get it for free at newsapi.org to enable live market feeds."
+        )
+        if news_api_key:
+            st.session_state['news_api_key'] = news_api_key
         
-        news_api_key = st.text_input("NewsAPI Key:", value="19f00766ce7840209e29c52b905e166c", type="password")
-        st.session_state['news_api_key'] = news_api_key
+    st.markdown("---")
     
     # 用户状态模块
     if st.session_state['logged_in']:
@@ -138,29 +133,27 @@ with st.sidebar:
 # ==========================================
 # 5. 页面主体 Tabs
 # ==========================================
-# ==========================================
-# 5. 页面主体 Tabs (卡片化地图)
-# ==========================================
 tab_overview, tab_news = st.tabs([
     ":material/dashboard: Terminal Overview", 
     ":material/newspaper: Market & Policy Context"
 ])
 
+# 修改前的代码大概在第 112 行附近：
 with tab_overview:
-    # 【改动】：将地图及标题完全包裹进卡片
+    # 把标题和地图都放进卡片里
     with st.container(border=True):
         st.markdown("""
-            <h3 style='display: flex; align-items: center; margin-bottom: 5px;'>
+            <h3 style='display: flex; align-items: center; margin-bottom: 0px;'>
                 <img src="https://api.iconify.design/icon-park-outline/map-draw.svg?color=%232563EB" width="26" style="margin-right: 10px;"> 
                 ERCOT Spatial Overview
             </h3>
-            <p style="color:#64748B; margin-top:0; font-size:14px;">Interactive visualization of regional risk levels and weather forecast nodes.</p>
         """, unsafe_allow_html=True)
+        st.markdown("<p style='color: #64748B; margin-bottom: 16px;'>Interactive visualization of regional risk levels and weather forecast nodes.</p>", unsafe_allow_html=True)
         
-        # 你的内嵌 Web 应用（自带了天气面板）
         render_ercot_map_workbench("http://127.0.0.1:5178", height=750)
         
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True) # 增加一点卡片间的垂直间距
+
     st.markdown("<h3 style='margin-bottom: 24px;'>Core Modules</h3>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
 

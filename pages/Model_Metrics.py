@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from components.agent_ui import render_global_copilot
 import os
 from components.theme import inject_custom_css, render_sidebar_logo
-from streamlit_option_menu import option_menu
+
 
 # Page Configuration
 st.set_page_config(page_title="Model Matrix", page_icon=":material/science:", layout="wide")
@@ -30,55 +30,37 @@ elif 'logged_in' not in st.session_state:
 
 with st.sidebar:
     render_sidebar_logo()
-    st.markdown("---")
     
-    # 这里的 default_index=2 (代表第三个菜单项)
-    selected_page = option_menu(
-        menu_title=None, 
-        options=["Terminal Home", "Live Forecast", "Model Metrics"],
-        icons=["house", "graph-up", "bar-chart-line"],
-        default_index=2,
-        styles={
-            "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#64748B", "font-size": "16px"},
-            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"4px 0"},
-            "nav-link-selected": {"background-color": "#10B981", "color": "white", "icon-color": "white"},
-        }
-    )
-    
-    # 路由跳转
-    if selected_page == "Terminal Home":
-        st.switch_page("Home.py")
-    elif selected_page == "Live Forecast":
-        st.switch_page("pages/Live_Forecast.py")
-        
+    st.page_link("Home.py", label="Terminal Home", icon=":material/dashboard:")
+    st.page_link("pages/Live_Forecast.py", label="Live Forecast", icon=":material/show_chart:")
+    st.page_link("pages/Model_Metrics.py", label="Model Metrics", icon=":material/analytics:")
     st.markdown("---")
     st.markdown("Copilot Access")
+    st.markdown("Interact with the quantitative RAG engine anytime.")
     render_global_copilot()
+    st.markdown("---")
     
-    # 把用户状态包在独立卡片里，保持三个页面完全一致
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.container(border=True):
-        if st.session_state['logged_in']:
-            st.markdown("""
-                <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                        <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
-                    </div>
-                    <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
+    # 左下角用户状态
+    if st.session_state['logged_in']:
+        st.markdown("""
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <img src="https://api.iconify.design/icon-park-outline/user.svg?color=%23475569" width="20">
                 </div>
-            """, unsafe_allow_html=True)
-            if st.button("Sign Out", use_container_width=True):
-                st.session_state['logged_in'] = False
-                if "token" in st.query_params:
-                    del st.query_params["token"]
-                st.rerun()
-        else:
-            st.markdown("<p style='color: #64748B; font-size: 14px; margin-bottom: 10px; font-weight: 500;'>Not logged in</p>", unsafe_allow_html=True)
-            if st.button("Sign In", use_container_width=True):
-                st.session_state['logged_in'] = True
-                st.query_params["token"] = "valid"
-                st.rerun()
+                <div style="color: #1E293B; font-weight: 500; font-size: 15px;">user@gridwise.com</div>
+            </div>
+        """, unsafe_allow_html=True)
+        if st.button("Sign Out", use_container_width=True):
+            st.session_state['logged_in'] = False
+            if "token" in st.query_params:
+                del st.query_params["token"]
+            st.rerun()
+    else:
+        st.markdown("<p style='color: #64748B; font-size: 14px; margin-bottom: 10px; font-weight: 500;'>Not logged in</p>", unsafe_allow_html=True)
+        if st.button("Sign In", use_container_width=True):
+            st.session_state['logged_in'] = True
+            st.query_params["token"] = "valid"
+            st.rerun()
 
 st.title(":material/science: Model Matrix & Audit Console")
 st.markdown("Interactive historical backtesting, performance metrics, and explainable AI insights.")
