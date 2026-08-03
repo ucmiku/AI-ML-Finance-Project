@@ -1,0 +1,14 @@
+{
+  "six_joblib_models_loaded": true,
+  "predict_one_success": true,
+  "predict_batch_success": true,
+  "probability_sum_success": true,
+  "derived_probability_success": true,
+  "signal_rule_success": true,
+  "global_shap_success": true,
+  "local_shap_success": true,
+  "json_serialization_success": true,
+  "python_syntax_success": true,
+  "absolute_path_secret_scan_success": true,
+  "test_stdout_preview": "{\n  \"models_loaded\": 6,\n  \"prediction\": {\n    \"delivery_hour_utc\": \"2025-01-01 06:00:00+00:00\",\n    \"predicted_spread\": -0.22132727007071176,\n    \"p_c1\": 0.01064635493387703,\n    \"p_c2\": 0.12810971661471754,\n    \"p_c3\": 0.5022185076310741,\n    \"p_c4\": 0.25677373656081476,\n    \"p_c5\": 0.10225168425951654,\n    \"p_negative\": 0.13875607154859457,\n    \"p_neutral\": 0.5022185076310741,\n    \"p_positive\": 0.3590254208203313,\n    \"predicted_class\": \"C3\",\n    \"confidence\": 0.5022185076310741,\n    \"signal\": \"NO_TRADE\",\n    \"model_version\": \"C1_v1_model_handoff_from_phase_C_v3\",\n    \"deployment_status\": \"demo_three_fold_ensemble\"\n  },\n  \"batch_count\": 1,\n  \"global_shap_heads\": [\n    \"grouped_feature_importance\",\n    \"negative_probability_C1\",\n    \"neutral_probability_C3\",\n    \"positive_probability_C5\",\n    \"spread_regression\"\n  ],\n  \"local_shap_top_feature\": {\n    \"feature\": \"solar_ramp_1h_mw\",\n    \"feature_value\": null,\n    \"shap_value\": 0.13503729552030563,\n    \"abs_shap_value\": 0.13503729552030563,\n    \"rank\": 1\n  }\n}\n"
+}

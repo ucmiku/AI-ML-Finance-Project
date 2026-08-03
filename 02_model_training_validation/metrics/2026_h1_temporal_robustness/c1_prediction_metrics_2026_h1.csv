@@ -1,0 +1,2 @@
+system_id,period,research_label,rows,accuracy,macro_f1,balanced_accuracy,log_loss,mae_predicted_spread,rmse_predicted_spread,r2_predicted_spread,direction_accuracy
+C1_best_boosting_complete_system,2026_H1,frozen-rule post-hoc temporal robustness evaluation,4197,0.41934715272813916,0.32852296661310537,0.33499435268506395,1.2834658461731765,14.857828483077203,68.79494754739261,0.09091072012304591,0.5792232547057422

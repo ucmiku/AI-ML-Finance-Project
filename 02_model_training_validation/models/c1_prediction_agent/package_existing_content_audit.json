@@ -1,0 +1,8 @@
+{
+  "models/c1_prediction_agent": true,
+  "src/inference/c1_inference.py": true,
+  "requirements-model.txt": true,
+  "global_shap_files": false,
+  "local_shap_inference_logic": true,
+  "model_loading_test": false
+}
