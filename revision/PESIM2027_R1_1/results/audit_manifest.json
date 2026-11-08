@@ -1,0 +1,143 @@
+{
+  "run_id": "pesim2027_phase0_r1_1_c093d1119f27e414",
+  "audit_version": "1.0.0",
+  "status": "COMPLETE_READ_ONLY_AUDIT",
+  "scope": [
+    "Phase 0 economic baseline",
+    "Reviewer 1.1 threshold evidence"
+  ],
+  "no_model_training": true,
+  "source_artifacts_modified": false,
+  "parameters": {
+    "spread_definition": "RT_minus_DA",
+    "capture_rate": 0.65,
+    "commission_usd_per_mwh": 2.0,
+    "slippage_rate": 0.005,
+    "old_spread_clip": [
+      -1000.0,
+      5000.0
+    ],
+    "canonical_spread_treatment": "unclipped",
+    "class_boundaries_usd_per_mwh": [
+      -20.0,
+      -5.0,
+      5.0,
+      20.0
+    ],
+    "evaluation_population": "evaluation_eligible == 1 in frozen model input"
+  },
+  "input_artifacts": {
+    "submitted_pdf": {
+      "path": "D:\\NUS SOC2026\\会议论文\\PESIM2027_ERCOT_ExtremeWeather_VirtualBidding.pdf",
+      "sha256": "47dfc0b8bb67fa840b7da2b93a855838789f70f7ae9527e2a774753dcf10a6f4",
+      "bytes": 813521
+    },
+    "model_input_frozen": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\data\\model_ready\\model_input_frozen_v2.parquet",
+      "sha256": "f5730506707c2f227f6208bb6bc00ca4c0c45fe5a23c3148c1e9c2c04cfa0717",
+      "bytes": 9477025
+    },
+    "hourly_strategy_2025": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\hourly_strategy_results_2025.parquet",
+      "sha256": "d66f662e3427dc9492264bec192317356dd981b2f7dafb08721cf066908dafeb",
+      "bytes": 1154241
+    },
+    "hourly_strategy_2026": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\hourly_strategy_results_2026.parquet",
+      "sha256": "c4e62f1a8f6bcdda3652e94cf71d30475449a8118267ef31468278b72749fb1d",
+      "bytes": 627345
+    },
+    "table7_2025": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\table7_2025_strategy_evaluation.csv",
+      "sha256": "a34e62bd1f7e49448bb6b025400773b79bde9997721026685e01a654b3a0aed0",
+      "bytes": 1220
+    },
+    "table8_2026": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\table8_2026_strategy_evaluation.csv",
+      "sha256": "430ef78dd2b98f597162c79d0b64a424d3e233654f8688712377ee5874a6c811",
+      "bytes": 1181
+    },
+    "risk_diagnostics": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\tableS_strategy_risk_diagnostics.csv",
+      "sha256": "2285ec761f0540745ab352fd82f28627fd47cdd9a394eff3c9f9e971e2e38eda",
+      "bytes": 7724
+    },
+    "canonical_execution_manifest": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\execution_manifest.json",
+      "sha256": "7b333ba3ccb464f5d22a2bf416181c6b937ee9b71e7e14c41cb2886e23983127",
+      "bytes": 1103
+    },
+    "canonical_code": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\src\\canonical_trading.py",
+      "sha256": "796d26dd645d0c5fdace832f7f06eb32e536c1c83ebfa35baedc1330e4651190",
+      "bytes": 19168
+    },
+    "old_2026_prediction_package": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\phase_C_model_selection_validation\\delivery_packages\\trading_handoff_C1_2026_H1_v1\\C1_unified_prediction_table_2026_H1_walkforward_v1.csv",
+      "sha256": "5d60381546b57926135cc445e83e1041cecf34c4195771fed8db1a624c877812",
+      "bytes": 2183372
+    },
+    "old_2026_code": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\phase_C_model_selection_validation\\scripts\\run_c1_c4_weekly_2026_v3.py",
+      "sha256": "eaf5019c1b831298c4a733f7159baa8dc6e0ed0bb14a7f8757070a0be3df1a89",
+      "bytes": 24157
+    },
+    "initial_threshold_readme": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\README.md",
+      "sha256": "3b09e6f75eb590a63b811e6ac261a1ab8de9cb4ea3e7dc9785306eab2a4dd6d1",
+      "bytes": 5740
+    },
+    "initial_label_builder": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\data_audit\\refresh_data_architecture_v2.py",
+      "sha256": "03a745732e1eab34d954fc627ac85105ea8cad0090ad7492162428e2b997f556",
+      "bytes": 41506
+    },
+    "m8_5_20_classifier_code": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\models\\formal_m8_spike_classifier_v2.py",
+      "sha256": "3e6ae4f4e8c0ac0e210a2b2f92a9abcced430ac3e5509f8cf2e0f83c84991498",
+      "bytes": 3347
+    },
+    "m11_multiresolution": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\outputs\\metrics\\M11_multiresolution_metrics_v2.csv",
+      "sha256": "c127764f7cd8443dfcd1861d7b8d0498430a063acde962654edf41abdbda5693",
+      "bytes": 932
+    },
+    "b2_classifier_config": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\phase_C_model_selection_validation\\outputs\\experiments\\B2_classifier_5_20_formal_v3r1_f5730506\\config.json",
+      "sha256": "4b800b2561261a55d84780ff84a976c8edafe422c41822ce9bd3c2bf07e04114",
+      "bytes": 397
+    },
+    "b2_classifier_summary": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\phase_C_model_selection_validation\\outputs\\experiments\\B2_classifier_5_20_formal_v3r1_f5730506\\run_summary.json",
+      "sha256": "de0e5251abf28d3d6edd7cabb58ffd2dd4fd1c6c9aa4f0224a19421c613b3f06",
+      "bytes": 1219
+    },
+    "2026_prediction_manifest": {
+      "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\phase_C_model_selection_validation\\delivery_packages\\trading_handoff_C1_2026_H1_v1\\C1_unified_prediction_table_2026_H1_manifest_v1.json",
+      "sha256": "1cf05e7e0fd002aec374acf5d3b42893273bd90e6c28693b80c8d5ac6e64d624",
+      "bytes": 5907
+    }
+  },
+  "audit_code": {
+    "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R1_1\\audit_phase0_r1_1.py",
+    "sha256": "759ed27be10804a731764bd52876759d223a3619adcefc1344ed765a5d576a2c",
+    "version": "1.0.0"
+  },
+  "environment": {
+    "python": "3.9.5 (tags/v3.9.5:0a7dcbd, May  3 2021, 17:27:52) [MSC v.1928 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2"
+  },
+  "reproduce_command": "\"D:\\py\\Python3\\python.exe\" \"D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R1_1\\audit_phase0_r1_1.py\" --project-root \"D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\" --submitted-pdf \"D:\\NUS SOC2026\\会议论文\\PESIM2027_ERCOT_ExtremeWeather_VirtualBidding.pdf\" --output-dir \"D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R1_1\\results\"",
+  "acceptance_checks": {
+    "canonical_2026_rows": 33576,
+    "canonical_2026_unique_hours": 4197,
+    "old_and_canonical_signal_mismatch_rows": 0,
+    "old_total_pnl_usd": 5705.049650000001,
+    "canonical_s1_total_pnl_usd": 6991.486025,
+    "canonical_s5_total_pnl_usd": 7818.613437500002,
+    "clipping_difference_rows": 5,
+    "clipping_explained_difference_usd": 1286.4363750000002
+  }
+}

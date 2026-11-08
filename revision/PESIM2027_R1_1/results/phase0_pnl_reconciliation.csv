@@ -1,0 +1,4 @@
+run_id,comparison,eligible_hours,trades,total_pnl_usd,spread_treatment,status
+pesim2027_phase0_r1_1_c093d1119f27e414,old_prediction_package_clipped,4197,441,5705.049650000001,"clip[-1000,5000]",reproduced
+pesim2027_phase0_r1_1_c093d1119f27e414,submitted_canonical_unclipped,4197,441,6991.486025,unclipped observed spread,reproduced
+pesim2027_phase0_r1_1_c093d1119f27e414,canonical_minus_old,5,5,1286.4363749999993,difference caused only by clipping,fully reconciled
