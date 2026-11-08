@@ -1,0 +1,135 @@
+{
+  "run_id": "FIG2OPT-20261108-95BE40EA1E65",
+  "operation": "layout-only optimization of submitted Fig. 2",
+  "source_package": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2",
+  "source_sha256": {
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\figures\\Fig4_SHAP_StrictOOF_Beeswarm_v3.tiff": "a2e10d44240946d789867dc7342457fb85b2126ecd2af0b0d8a08f617075d2fc",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\figures\\Fig4_SHAP_StrictOOF_Beeswarm_v3.png": "8f92c20faf49d8450b93671fb7eafdae89c340c191decbdb6c6007cd4afada29",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\code\\build_strict_oof_shap_fig4.py": "0aaad1c6e6f883e74a95154b7a42d0582ecadbd50573742b61056f446c7c5df0",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\per_feature_mean_abs_shap.csv": "d5e24db9cc4910a6c74999d6edac0595d8bad22b1da33c30e0c095ac30f95362",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\family_size_normalized_importance.csv": "2fa7febfbf0f2aa8f6ca1232e705a6dd7747f37b4e97ef991b1f97918ccc242a",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\shap_feature_values_oof_2025.parquet": "dfe07b9d6011cdcb662cd4a37f6af7db309abfc42f6f9634e7f79906e3cd8972",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\shap_b2a_spread_oof_2025.parquet": "c533d45b6eebe0aeac406a3a55fbe4c26a294a4e5a1baf1e891c50c7d92263bf",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\shap_b2b_c1_margin_oof_2025.parquet": "19f4a1c8323f3275b8995f9687b11ecbc9f4a05e72f5d0552d55033df1bb0bbe",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\shap_b2b_c5_margin_oof_2025.parquet": "11083767c8e73f57da9b24fc0e27e77293c4bd4ed3c1701de9c53d1c1439fe7c",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\Fig4_beeswarm_top_feature_ranking.csv": "751a1b7747f62010a6a14cbdc79e736a6d93b97e3e0d7373995820783835adb4",
+    "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\outputs\\manuscript_figures\\oof_shap_v2\\data\\oof_shap_manifest.json": "eafa2f4967dae52342457da4978f78ee5c87064b6b62853c5f33e1c545487e8d"
+  },
+  "optimization_script_sha256": "2df30cb47132a1e32462dc07be2e3e8de59703eef2cb2590f19203e58f7c75d7",
+  "layouts": {
+    "A_balanced": {
+      "height": 3.28,
+      "title_size": 8.1,
+      "tick_size": 7.0,
+      "feature_size": 7.1,
+      "label_size": 7.2,
+      "colorbar_size": 6.7,
+      "name_style": "moderate",
+      "axes": {
+        "a": [
+          0.045,
+          0.18,
+          0.15,
+          0.67
+        ],
+        "a_colorbar": [
+          0.204,
+          0.18,
+          0.01,
+          0.67
+        ],
+        "b": [
+          0.385,
+          0.18,
+          0.1,
+          0.67
+        ],
+        "c": [
+          0.62,
+          0.18,
+          0.09,
+          0.67
+        ],
+        "d": [
+          0.82,
+          0.18,
+          0.095,
+          0.67
+        ],
+        "d_colorbar": [
+          0.925,
+          0.18,
+          0.009,
+          0.67
+        ]
+      }
+    },
+    "B_readability": {
+      "height": 3.68,
+      "title_size": 8.5,
+      "tick_size": 7.4,
+      "feature_size": 7.5,
+      "label_size": 7.6,
+      "colorbar_size": 7.0,
+      "name_style": "aggressive",
+      "axes": {
+        "a": [
+          0.045,
+          0.16,
+          0.15,
+          0.72
+        ],
+        "a_colorbar": [
+          0.204,
+          0.16,
+          0.01,
+          0.72
+        ],
+        "b": [
+          0.385,
+          0.16,
+          0.1,
+          0.72
+        ],
+        "c": [
+          0.62,
+          0.16,
+          0.09,
+          0.72
+        ],
+        "d": [
+          0.82,
+          0.16,
+          0.095,
+          0.72
+        ],
+        "d_colorbar": [
+          0.925,
+          0.16,
+          0.009,
+          0.72
+        ]
+      }
+    }
+  },
+  "invariants_verified": {
+    "sample_count_per_output": 8760,
+    "feature_ranking_matches_source_csv": true,
+    "mean_abs_shap_matches_source_csv": true,
+    "display_clip_q99_7_matches_source_csv": true,
+    "color_mapping_unchanged": true,
+    "model_training_performed": false,
+    "source_data_modified": false
+  },
+  "output_sha256": {
+    "Fig2_SHAP_A_balanced.png": "4ad6131ec94bbe81b90f709a124ed755feb9f0c1dfa5df40e263f413abee6d43",
+    "Fig2_SHAP_A_balanced.svg": "68826a1bab61a418cc7fef4b175b7029c2ae8610a50f300a9101d1435c8b4a20",
+    "Fig2_SHAP_A_balanced.tiff": "530143529b18e6aa0f73da53b16a3ed602bab64997f7010f800cc59efacc34dd",
+    "Fig2_SHAP_B_readability.png": "e89ce749fcad485281493f46eca622fe05d6177332b3629bd8d3d36fb2d700b0",
+    "Fig2_SHAP_B_readability.svg": "18aad47ca10f5eb230f3d609f887e4788f257c72164cab63ece043b5c286357c",
+    "Fig2_SHAP_B_readability.tiff": "0972855f642b06f45c084ce514d9827e488e0ac1965afff997f0405ef416a69e",
+    "Fig2_comparison_preview.png": "1f5346963531ed3ebd4586fb8f6fa229c5d9d9430faad4d9ccdf7b5fbbf904bf",
+    "Fig2_submitted_source.png": "8f92c20faf49d8450b93671fb7eafdae89c340c191decbdb6c6007cd4afada29"
+  },
+  "reproduction_command": "python revision/PESIM2027_Fig2_Optimization/optimize_fig2_shap.py"
+}

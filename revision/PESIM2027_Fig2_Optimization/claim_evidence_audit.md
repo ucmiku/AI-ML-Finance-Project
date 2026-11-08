@@ -1,0 +1,11 @@
+# Fig. 2 optimization claim–evidence audit
+
+| Claim ID | Section | Claim text | Claim type | Evidence status | Run ID | Artifact | Citation keys | Audit decision | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+| F2-01 | Source identification | The latest Word-embedded Fig. 2 TIFF is byte-identical to the local `Fig4_SHAP_StrictOOF_Beeswarm_v3.tiff`. | provenance | supported | FIG2OPT-20261108-95BE40EA1E65 | `figure_manifest.json`; Word `word/media/image2.tiff`; local source TIFF | — | pass | Matching SHA256: `A2E10D44240946D789867DC7342457FB85B2126ECD2AF0B0D8A08F617075D2FC`. |
+| F2-02 | Source identification | The submitted figure has a recoverable Python source and frozen SHAP data package. | reproducibility | supported | FIG2OPT-20261108-95BE40EA1E65 | `figure_manifest.json`; local `build_strict_oof_shap_fig4.py`; `oof_shap_v2/data/` | — | pass | Original plotting function is at lines 631–765. |
+| F2-03 | Data scope | Each displayed SHAP output contains 8,760 strict 2025 chronological OOF hours. | numerical | supported | B2_regression_formal_v3r1_f5730506; B2_classifier_5_20_formal_v3r1_f5730506 | local `oof_shap_manifest.json`; three SHAP Parquet files | — | pass | Sample-count assertion also reruns in `optimize_fig2_shap.py`. |
+| F2-04 | Figure fidelity | The family order, top-six feature order, mean absolute SHAP values, display clipping thresholds, and feature-value colors are unchanged. | comparative | supported | FIG2OPT-20261108-95BE40EA1E65 | `figure_manifest.json`; local `Fig4_beeswarm_top_feature_ranking.csv`; optimized outputs | — | pass | Script stops on ranking, value, clipping, or sample-count mismatch. |
+| F2-05 | Output specification | Version A is 7.16 × 3.28 in and Version B is 7.16 × 3.68 in, both exported at 600 dpi in PNG/TIFF and as SVG. | numerical | supported | FIG2OPT-20261108-95BE40EA1E65 | `figure_manifest.json`; output image metadata | — | pass | TIFF uses lossless LZW compression. |
+| F2-06 | Workflow scope | No model was retrained and no source data or historical manuscript file was overwritten. | process | supported | FIG2OPT-20261108-95BE40EA1E65 | `figure_manifest.json`; Git diff | — | pass | New files are confined to `revision/PESIM2027_Fig2_Optimization/`. |
+
