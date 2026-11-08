@@ -1,0 +1,3 @@
+run_id,period,eligible_hours,freezing_trigger_hours,extreme_heat_trigger_hours,high_wind_trigger_hours,rainy_hours_not_in_gate,weather_gate_trigger_hours,base_probability_trades_S1,direction_confirmed_trades_S3,weather_gate_trades_S5,canonical_S5_trades
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,8760,440,698,759,936,1871,1174,933,425,425
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,4197,221,163,553,488,925,441,353,158,158

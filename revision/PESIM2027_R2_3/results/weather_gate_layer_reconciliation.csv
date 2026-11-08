@@ -1,0 +1,5 @@
+run_id,period,comparison,rows,timestamp_mismatches,flag_mismatches
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,frozen_to_prediction_handoff,8760,0,0
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,recomputed_S5_to_canonical_hourly,8760,0,0
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,frozen_to_prediction_handoff,4197,0,0
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,recomputed_S5_to_canonical_hourly,4197,0,0

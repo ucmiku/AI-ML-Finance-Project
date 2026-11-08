@@ -1,0 +1,21 @@
+run_id,period,check,mismatched_hours,status
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,freezing_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,extreme_heat_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,high_wind_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,rainy_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,fixed_extreme_weather_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,fixed_compound_extreme_count,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,freezing_trigger_matches_dfw_min_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,heat_trigger_matches_dfw_max_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,wind_trigger_matches_dfw_max_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2025 OOF,rain_trigger_matches_dfw_max_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,freezing_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,extreme_heat_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,high_wind_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,rainy_hour_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,fixed_extreme_weather_flag,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,fixed_compound_extreme_count,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,freezing_trigger_matches_dfw_min_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,heat_trigger_matches_dfw_max_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,wind_trigger_matches_dfw_max_or_wichita,0,PASS
+R2_3_WG_C64C6FDF13E0FE54,2026 H1 OOT,rain_trigger_matches_dfw_max_or_wichita,0,PASS
