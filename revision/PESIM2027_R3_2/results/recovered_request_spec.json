@@ -1,0 +1,58 @@
+{
+  "run_id": "R3_2_PROV_F78ADB0C81CB7F16",
+  "datacollection_commit": "82da6f7dc81e66433dad7d98885e1d43d5d8db02",
+  "endpoint": "https://previous-runs-api.open-meteo.com/v1/forecast",
+  "models_parameter": null,
+  "model_interpretation": "Open-Meteo default configuration; exact NWP model not recoverable from surviving filtered payload or local metadata",
+  "locations": [
+    {
+      "name": "Dallas",
+      "latitude": 32.7767,
+      "longitude": -96.797
+    },
+    {
+      "name": "Fort Worth",
+      "latitude": 32.7555,
+      "longitude": -97.3308
+    },
+    {
+      "name": "Denton",
+      "latitude": 33.2148,
+      "longitude": -97.1331
+    },
+    {
+      "name": "McKinney",
+      "latitude": 33.1972,
+      "longitude": -96.6397
+    },
+    {
+      "name": "Arlington",
+      "latitude": 32.7357,
+      "longitude": -97.1081
+    },
+    {
+      "name": "Wichita Falls",
+      "latitude": 33.9137,
+      "longitude": -98.4934
+    }
+  ],
+  "hourly_base_variables": [
+    "temperature_2m",
+    "relative_humidity_2m",
+    "wind_speed_10m",
+    "wind_gusts_10m",
+    "cloud_cover",
+    "shortwave_radiation",
+    "precipitation"
+  ],
+  "hourly_requested_variants": "each base variable with _previous_day1 and _previous_day2 in hybrid mode",
+  "timezone": "UTC",
+  "temperature_unit": "celsius",
+  "wind_speed_unit": "ms",
+  "precipitation_unit": "mm",
+  "date_parameters": "start_date and end_date in 31-day chunks, with query window expanded by one day on each side",
+  "lead_rule": "local delivery hours 00:00-08:00 select previous_day1 (24 h); 09:00-23:00 select previous_day2 (48 h)",
+  "decision_cutoff": "D-1 09:55 America/Chicago",
+  "forecast_run_time_warning": "constructed as target_hour_utc minus 24/48 h; not a supplier publication timestamp",
+  "api_key": "optional and omitted from saved public_params"
+}

@@ -1,0 +1,123 @@
+{
+  "run_id": "R3_2_PROV_F78ADB0C81CB7F16",
+  "audit_version": "pesim2027-r3.2-data-provenance-v1",
+  "status": "PASS_WITH_AVAILABILITY_LIMITATION",
+  "read_only": true,
+  "datacollection_ref": "origin/datacollection",
+  "datacollection_commit": "82da6f7dc81e66433dad7d98885e1d43d5d8db02",
+  "audit_script": {
+    "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\audit_data_provenance.py",
+    "sha256": "af47a76434175f315a360426ab5dc4b00b9f908877b02218e008bf99a9000a30"
+  },
+  "inputs": {
+    "branch_files": {
+      "01_data_collection_cleaning/scripts/collectors/openmeteo_collector.py": {
+        "sha256": "96c461bad8885c686d5797e5af4049af4a8d0cc2c2f8616de237072bc68d7ee0"
+      },
+      "01_data_collection_cleaning/scripts/collectors/common.py": {
+        "sha256": "5f7ba95d60016995e569f03123a262718f793629fd95ea65af9ccdc4f7ecb241"
+      },
+      "01_data_collection_cleaning/scripts/collect_data.py": {
+        "sha256": "898b8d2f2c2773ac56eb4a4526a836130274da9191dc2e8c9951c8ea016e0a5d"
+      },
+      "01_data_collection_cleaning/scripts/recover_single_run_weather.py": {
+        "sha256": "382000f6a56d9cded317531f639319151ecaebb131c0d30841fe49736a5b2341"
+      },
+      "01_data_collection_cleaning/scripts/build_clean.py": {
+        "sha256": "2448b17d0c0a754678299d448a04fa30020a1d04ca2e9d70e0ad81ddf34d7f09"
+      },
+      "01_data_collection_cleaning/scripts/build_model_wide.py": {
+        "sha256": "9b05b9a807850056ae06a5a6d9fd26d123b1ec59b150d20d5876aba1eb9a19d1"
+      },
+      "01_data_collection_cleaning/scripts/import_pre_dam_forecast_features.py": {
+        "sha256": "f5158079649f409ac23f199e3fecab08b183cef595ea61b5786046c51105c8cc"
+      },
+      "01_data_collection_cleaning/DATA_COLLECTION_STATUS.md": {
+        "sha256": "302f7921c382b44f15af8f63fa4c1e6b3ba8bf051125c6c3e80ff688f2de9718"
+      },
+      "01_data_collection_cleaning/DATA_INVENTORY.md": {
+        "sha256": "f5ec80dc8d0a62b369399d4e5f7033edb6c3563de5d3d7369de63bfce8479287"
+      },
+      "01_data_collection_cleaning/README.md": {
+        "sha256": "56ec3c82d74b9a31d3a7e4f17a028e5ca3062423a84fae2b40e94b1c5b2e7d61"
+      }
+    },
+    "local_files": {
+      "submitted_pdf": {
+        "path": "D:\\NUS SOC2026\\会议论文\\PESIM2027_ERCOT_ExtremeWeather_VirtualBidding.pdf",
+        "sha256": "47dfc0b8bb67fa840b7da2b93a855838789f70f7ae9527e2a774753dcf10a6f4"
+      },
+      "final_model_wide_previous_runs": {
+        "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\model_wide_hourly_2024_2026_final(2).csv",
+        "sha256": "ffe65f2fe4e44349ff4481aa43825ead7cec1a3906a3d13a5903d7301529d10d"
+      },
+      "frozen_model_input": {
+        "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v2\\data\\model_ready\\model_input_frozen_v2.parquet",
+        "sha256": "f5730506707c2f227f6208bb6bc00ca4c0c45fe5a23c3148c1e9c2c04cfa0717"
+      },
+      "deprecated_model_wide_historical": {
+        "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\02_prediction_agent_v1_deprecated\\data\\model_wide_hourly_2024_2026_final.csv",
+        "sha256": "f96f2ffeb719367ef7fbea9d262500883343b1e8064136662bbaa536cd7cbd65"
+      },
+      "canonical_hourly_2025": {
+        "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\hourly_strategy_results_2025.parquet",
+        "sha256": "d66f662e3427dc9492264bec192317356dd981b2f7dafb08721cf066908dafeb"
+      },
+      "canonical_hourly_2026": {
+        "path": "D:\\NUS SOC2026\\ERCOT_Virtual_Bidding_Project\\04_trading_strategy_evaluation\\section_iv_canonical_v1\\outputs\\hourly_strategy_results_2026.parquet",
+        "sha256": "c4e62f1a8f6bcdda3652e94cf71d30475449a8118267ef31468278b72749fb1d"
+      }
+    }
+  },
+  "outputs": {
+    "provenance_layers.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\provenance_layers.csv",
+      "sha256": "fd92cc897e5ad1b84775f177da5cc2da56399aa75c024fbf00ec21b5f9ddf8a2"
+    },
+    "source_transition_comparison.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\source_transition_comparison.csv",
+      "sha256": "5672440542f9d96b041e8dc69ea8bbf501e61abb23520122176548d7dc538d24"
+    },
+    "weather_layer_reconciliation.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\weather_layer_reconciliation.csv",
+      "sha256": "5d256d8f9a3618b7e61ec002069df8b62ffb7d3a86feb875ce69bea18327efba"
+    },
+    "forecast_availability_summary.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\forecast_availability_summary.csv",
+      "sha256": "daf9815acc25ddcdd939ce5ac59535585e6892e24af5722a1a95c94f0e1c11cf"
+    },
+    "availability_margin_distribution.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\availability_margin_distribution.csv",
+      "sha256": "21016bbc2609eefab7b05869a0e6aa7147514a6e271edcd75ce5112c9368a3d6"
+    },
+    "availability_edge_hours.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\availability_edge_hours.csv",
+      "sha256": "e39aacb162c34ee37df686b55f608a5ff0933e3b8927c5d228e28b8ffb8d454d"
+    },
+    "branch_evidence_sha256.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\branch_evidence_sha256.csv",
+      "sha256": "434ae5f2a00b9a456ce314a1b697748434b41f5ece44800bfc82d35620f29eae"
+    },
+    "local_evidence_sha256.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\local_evidence_sha256.csv",
+      "sha256": "cced36bf62b307915cb6115085dae301b81bc5621ee6223aeae95630bfd1a61e"
+    },
+    "local_provenance_file_inventory.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\local_provenance_file_inventory.csv",
+      "sha256": "3139c54431e0df32880cb36d993b1a4aaf5ef7f3fb531bf2ac12fe651b2b4c77"
+    },
+    "source_code_assertions.csv": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\source_code_assertions.csv",
+      "sha256": "6bed807e4ddbcefade7be3bfc0a2d24cb211bff8e700505b372ed3618bdc0bff"
+    },
+    "recovered_request_spec.json": {
+      "path": "D:\\NUS SOC2026\\AI-ML-Finance-Project\\revision\\PESIM2027_R3_2\\results\\recovered_request_spec.json",
+      "sha256": "ab3f4736e8bceda378dc4b0600e882047cf0f92992136159de3524916eadb98c"
+    }
+  },
+  "limitations": [
+    "No original previous-runs raw response, sibling metadata JSON, or collection SQLite database was found under the searched local root.",
+    "forecast_run_time_utc is constructed from target time and lag; it is not an observed publication timestamp.",
+    "No participant-side availability timestamp survives, so no hour can be independently certified against the DAM cutoff."
+  ]
+}

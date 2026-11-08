@@ -1,0 +1,4 @@
+run_id,field,common_hours,different_hours,mean_absolute_difference
+R3_2_PROV_F78ADB0C81CB7F16,temperature_dfw_mean_c,21427,21334,1.4455173379381154
+R3_2_PROV_F78ADB0C81CB7F16,wind_gust_dfw_max_ms,21427,21005,1.8605917767302935
+R3_2_PROV_F78ADB0C81CB7F16,precipitation_dfw_mean_mm,21427,3149,0.16117795304989033
